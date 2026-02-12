@@ -268,20 +268,23 @@ function CallInterface() {
             }
 
             // --- SEMANTIC BARGE-IN FILTER ---
-            // If the user just says "Hmm", "Achha", "Okay" -> IGNORE IT.
-            // This prevents the bot from stopping and replying to background agreement.
+            // STRICT RULE: Single-word utterances are ALWAYS rejected.
+            // Two-word utterances are rejected if they match the ignored phrases list.
             const cleanText = userText.toLowerCase().trim().replace(/[.,!?-]/g, "");
-            const words = cleanText.split(/\s+/); // Split by whitespace
+            const words = cleanText.split(/\s+/).filter(w => w.length > 0);
 
-            // Check if the ENTIRE transcript is just ignored phrases
-            // Safer logic: If the transcript is <= 2 words AND those words are in the ignore list.
-            const isIgnored = (words.length <= 2 && words.every(w => IGNORED_PHRASES.includes(w)));
+            // STRICT: Reject ALL single-word transcriptions — no exceptions
+            if (words.length <= 1) {
+                console.log(`🚫 Single-word REJECTED (strict ban): "${userText}"`);
+                startListening();
+                return;
+            }
+
+            // Also reject 2-word phrases that are filler/acknowledgment
+            const isIgnored = (words.length === 2 && words.every(w => IGNORED_PHRASES.includes(w)));
 
             if (isIgnored) {
-                console.log(`🚫 Semantic Noise Ignored: "${userText}"`);
-                // Just resume listening silently. 
-                // Ideally we should resume playback if we stopped it? 
-                // For now, just don't reply. The user will speak again if they meant to interrupt.
+                console.log(`🚫 Filler phrase ignored: "${userText}"`);
                 startListening();
                 return;
             }
