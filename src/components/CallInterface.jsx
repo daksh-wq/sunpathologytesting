@@ -235,7 +235,7 @@ function CallInterface() {
             },
             600, // Silence threshold
             handleSpeechStart, // On Speech Start (Barge-in trigger)
-            750  // Safeguard delay (750ms to allow Silero VAD calibration)
+            150  // Safeguard delay (150ms to allow instant barge-in without missing their voice)
         );
     }, [aiStatus, updateAiStatus]);
 

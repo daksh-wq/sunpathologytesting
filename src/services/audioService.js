@@ -164,10 +164,10 @@ class AudioService {
         const SPEECH_START_FRAMES = 5;  // ~100ms sustained sound to start speech
         const SPEECH_END_FRAMES = 15;   // ~300ms silence to end speech segment
 
-        // --- PRODUCTION: Increased Persistence for Barge-In ---
-        // 18 Frames * ~20ms = ~360ms of CONTINUOUS speech required.
-        // A click/drop lasts < 50ms. It will never reach 18 frames.
-        const BARGE_IN_FRAMES = 18;
+        // --- PRODUCTION: Instant Barge-In ---
+        // 7 Frames * ~20ms = ~140ms of CONTINUOUS speech required.
+        // Drops/clicks still won't trigger this, but human speech triggers instantly.
+        const BARGE_IN_FRAMES = 7;
 
         // Transient Rejection Logic
         let previousEnergy = 0;
@@ -337,11 +337,11 @@ class AudioService {
                     if (onSpeechStart) {
                         // --- PRODUCTION BARGE-IN DECISION ---
                         // Must have BOTH sustained duration AND high confidence
-                        const bargeInConfidenceThreshold = consecutiveSpeechFrames < 12 ? 0.85 : 0.70;
+                        const bargeInConfidenceThreshold = consecutiveSpeechFrames < 10 ? 0.80 : 0.65;
 
                         if (consecutiveSpeechFrames >= BARGE_IN_FRAMES && avgConfidence >= bargeInConfidenceThreshold) {
                             console.log(
-                                `✅ BARGE-IN ACCEPTED | Confidence: ${(avgConfidence * 100).toFixed(1)}% | ` +
+                                `✅ INSTANT BARGE-IN ACCEPTED | Confidence: ${(avgConfidence * 100).toFixed(1)}% | ` +
                                 `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} (${zcrScore.toFixed(2)}) | ` +
                                 `Flux: ${spectralFlux.toFixed(1)} (${fluxScore.toFixed(2)}) | ` +
                                 `Frames: ${consecutiveSpeechFrames} | Silero: ${this.sileroReady ? (this.sileroSpeaking ? 'SPEECH' : 'SILENT') : 'N/A'}`
