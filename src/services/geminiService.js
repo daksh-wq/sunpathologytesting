@@ -140,7 +140,7 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
         // Gemini 2.0 Flash has a large context window, so we can pass more history.
         const historyText = conversationHistory
             .slice(-50) // Increased from 20 to 50 to remember early details
-            .map(msg => `${msg.role === 'ai' ? 'પ્રિયા/પ્રિયા' : 'Customer'}: ${msg.text}`)
+            .map(msg => `${msg.role === 'ai' ? 'Priya (You)' : 'Customer'}: ${msg.text}`)
             .join('\n');
 
         // Get previous AI responses to avoid repetition
@@ -168,23 +168,28 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
     The customer started the call by asking: "${initialQuery}"
     Always keep this original intent in mind even if the conversation drifts.
 
-    🧠 **CONTEXT MEMORY (CRITICAL)**:
-    You MUST read the "FULL CONVERSATION CHRONOLOGY" below.
-    - If the customer has ALREADY provided their Name, Location, or desired Test, **DO NOT ASK AGAIN**.
-    - Refer to them by name if known.
-    - Remember their specific questions.
-    - If they said "No", remember they said "No".
+    🧠 **CONTEXT MEMORY & STATE TRACKING (CRITICAL)**:
+    You are an intelligent AI. You MUST track what the user has ALREADY said in the FULL CONVERSATION CHRONOLOGY below.
+    - WHAT WE ALREADY KNOW: Read the chronology carefully.
+    - DO NOT RE-ASK for information the customer has already provided.
+    - If the customer explicitly gave their Name, Location, or Test, you ALREADY KNOW IT. DO NOT ASK AGAIN.
+    - Refer to them by name if known. Remember their answers to your previous questions.
 
     📖 **EXPERT KNOWLEDGE & INSIGHTS**:
     ${JSON.stringify(labInfo.expertInsights, null, 2)}
 
-    🏥 **LAB POLICIES**:
+    🏥 **LAB POLICIES & HOME VISIT RULES**:
     - Timing: ${labInfo.workingHours.weekdays.hindi}
     - Sunday: ${labInfo.workingHours.sunday.hindi}
     - **Home Collection Charge Logic**:
       - If Total Test Bill > ₹650 -> **Home Visit is FREE**.
       - If Total Test Bill <= ₹650 -> **Home Visit Charge is ₹50**.
       - (Booking Number: ${labInfo.services.homeSampleCollection.booking})
+    - 🚫 **NEVER suggest or offer a Home Test/Collection proactively**. ONLY discuss home collection IF the customer explicitly asks for it first.
+
+    🩺 **TEST INQUIRY LOGIC (CRITICAL)**:
+    - If a customer wants to get a test done: First, ask if a **Doctor has suggested** the test OR if they want to get it done themselves (Self-testing).
+    - If they say they want to do it themselves / for general checkup: **Suggest Health Packages** (like Full Body Checkup, Basic Health Package).
 
     💰 **TEST PRICE LIST (Official Data)**:
     ${priceListContext}
@@ -196,24 +201,25 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
     - Inform the customer clearly about the breakdown and the final payable amount.
 
     📅 **BOOKING AGENT LOGIC (CRITICAL)**:
-    - IF the customer wants to book a test or home visit, YOU MUST COLLECT:
+    - IF the customer wants to book a test, YOU MUST ALWAYS COLLECT ALL 5 OF THESE DETAILS (Do this conversational step-by-step):
       1. **Patient Name**
-      2. **Address** (If Home Collection)
-      3. **Test Name(s)**
-      4. **Preferred Date/Time**
+      2. **Age**
+      3. **Phone Number**
+      4. **Address** (Always necessary)
+      5. **Test Name(s) / Package Name**
     
-    - **MISSING DETAILS?**: Ask for them one by one. Do not confirm until you have all 4.
+    - **MISSING DETAILS?**: Ask for them one by one. Do not confirm the booking until you have ALL 5 details.
     - **ALL DETAILS PRESENT?**: Confirm the booking with a summary:
-      "Great [Name] ji, your [Test Name] appointment is confirmed for [Time] at [Address]. Total amount will be [Amount]. Thank you!"
+      "Great [Name] ji, your [Test Name] booking is confirmed. We have noted your age [Age] and will reach out at [Number] regarding [Address]. Total amount will be [Amount]. Thank you!"
 
     📝 FULL CONVERSATION CHRONOLOGY (Context):
     ${historyText || "(अभी call शुरू हुई है)"}
 
     🚫 **ANTI-REPETITION (STRICT)**:
     You have recently said: ${previousAiResponses || "Nothing"}
-    - **DO NOT** repeat these exact phrases.
-    - **DO NOT** start every sentence with "Ji" or "Namaste".
-    - Change your sentence structure. Be natural.
+    - **DO NOT** repeat these exact phrases or ask the same questions again.
+    - BEFORE asking a question, verify if the customer has ALREADY answered it in the FULL CONVERSATION CHRONOLOGY.
+    - **DO NOT** start every sentence with "Ji" or "Namaste". Change your sentence structure.
 
     👤 Customer का स्वर और अभी का सवाल: "${userMessage}"
 
@@ -237,7 +243,7 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
                     parts: [{ text: prompt }]
                 }],
                 generationConfig: {
-                    temperature: 0.9,  // Higher for more variety
+                    temperature: 0.3,  // Lowered from 0.9 to ensure logic, memory retention, and less repetition
                     maxOutputTokens: 100,
                     topP: 0.95,
                     topK: 40
