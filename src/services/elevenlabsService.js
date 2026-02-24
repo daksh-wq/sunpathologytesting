@@ -12,8 +12,8 @@ const VOICE_ID_AISHA = "mg9npuuaf8WJphS6E0Rt"; // Aisha - Friendly, empathetic
 // Raju - Clear and warm, good for storytelling
 const VOICE_ID_RAJU = "ErXwobaYiN019PkySvjV"; // Raju - Clear, natural, warm
 
-// Default voice - Priya (Custom Voice ID provided by user)
-const DEFAULT_VOICE_ID = "nlRBcodAo9LA6ChkhS0i";
+// Default voice - Rachel (Standard pre-made voice that works on Free Tier API)
+const DEFAULT_VOICE_ID = "21m00Tcm4TlvDq8ikWAM";
 
 // Detect if text is primarily Gujarati
 const isGujarati = (text) => {
