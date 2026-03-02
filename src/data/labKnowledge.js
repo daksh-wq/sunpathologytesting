@@ -8,19 +8,19 @@ export const labInfo = {
     // Working Hours
     workingHours: {
         weekdays: {
-            open: "8:00 AM",
+            open: "7:00 AM",
             close: "8:00 PM",
-            hindi: "सुबह 8 बजे से रात 8 बजे तक (सोमवार से शनिवार)"
+            hindi: "सुबह 7 बजे से रात 8 बजे तक (सोमवार से शनिवार)"
         },
         sunday: {
-            open: "9:00 AM",
-            close: "11:00 AM",
-            hindi: "सुबह 9 बजे से सुबह 11 बजे तक"
+            open: "7:00 AM",
+            close: "8:00 PM",
+            hindi: "सुबह 7 बजे से रात 8 बजे तक (रविवार सहित)"
         },
         holidays: {
-            open: "9:00 AM",
-            close: "11:00 AM",
-            hindi: "सुबह 9 बजे से सुबह 11 बजे तक"
+            open: "7:00 AM",
+            close: "8:00 PM",
+            hindi: "सुबह 7 बजे से रात 8 बजे तक"
         }
     },
 
@@ -76,7 +76,63 @@ export const labInfo = {
             { name: "फुल बॉडी चेकअप", price: "2499", time: "24-48 घंटे", includes: "70+ tests" },
             { name: "डायबिटीज़ पैकेज", price: "799", time: "24 घंटे", includes: "Fasting Sugar, PP Sugar, HbA1c, KFT" },
             { name: "थायरॉइड पैकेज", price: "699", time: "24 घंटे", includes: "T3, T4, TSH" },
-            { name: "हार्ट पैकेज", price: "1499", time: "24 घंटे", includes: "Lipid Profile, ECG, CBC" }
+            { name: "हार्ट पैकेज", price: "1499", time: "24 घंटे", includes: "Lipid Profile, ECG, CBC" },
+
+            // Comprehensive Specialty Packages (with discounts)
+            { name: "Allergy Profile", price: "3000", originalPrice: "7000", discount: "57%", time: "2-3 days", includes: "Food Allergy, Inhalant Allergy, Drug Allergy, Contact Allergy" },
+            { name: "Food Intolerance Testing", price: "6500", originalPrice: "10000", discount: "35%", time: "2-3 days", includes: "Bloating Diarrhea or IBS, Headache or Migraine, Chronic Fatigue, Depression or Anxiety, Skin Problems, Weight Control, Arthritis" },
+            { name: "Alcohol Impact Profile", price: "600", originalPrice: "3550", discount: "85%", time: "24 hours", includes: "CBC, Urine RM, RBS, SGPT, SGOT, Creatinine, Alkaline Phosphate, GGT, Total Bilirubin" },
+            { name: "Immunization Package For Abroad Students", price: "6100", originalPrice: "8800", discount: "30%", time: "2-3 days", includes: "Mantoux (MT), TB Gold, HBsAg by CLIA, Anti HBs, Mumps Antibody Titre (IgG), Measles Antibody Titre (IgG), Rubela Antibody Titre (IgG), Varicella Zoster Antibody Titre (IgG & IgM)" },
+            { name: "Hypertension Health Package (Basic)", price: "3150", originalPrice: "6900", discount: "54%", time: "24 hours", includes: "CBC, Bl.Urea, Creatinine, Sodium, Potassium, Lipid Profile, Homocysteine, HS CRP, HbA1c, Urinary Alb./Cre. Ratio, TSH, Vitamin B12, Cortisol am, Cortisol pm" },
+            { name: "Hypertension Health Package (Complete)", price: "4150", originalPrice: "8700", discount: "52%", time: "24 hours", includes: "CBC, Bl.Urea, Creatinine, Sodium, Potassium, Lipid Profile, Homocysteine, HS CRP, HbA1c, Urinary Alb./Cre. Ratio, TSH, Vitamin B12, Cortisol am, Cortisol pm, NT Pro BNP" },
+            { name: "Obesity Profile", price: "850", originalPrice: "2850", discount: "70%", time: "24 hours", includes: "CBC, ESR, Urine RM, FBS, Creatinine, Uric Acid, SGPT, Lipid Profile, T3, T4, TSH" },
+            { name: "Metabolic Panel (Basic)", price: "1350", originalPrice: "5250", discount: "74%", time: "24 hours", includes: "CBC, ESR, Urine RM, FBS, Bl.Urea, BUN, Creatinine, Uric Acid, Sodium, Potassium, Chloride, Calcium, Phosphorous, SGPT, SGOT, Total Bilirubin, Alkaline Phosphate, Total Protein, Albumin, Globulin, A:G Ratio, Lipid Profile" },
+            { name: "Metabolic Panel (Complete)", price: "1950", originalPrice: "7950", discount: "75%", time: "24 hours", includes: "Basic Metabolic Panel, Insulin (Fasting & PPBS), Cortisol am & pm, PTH" },
+            { name: "PCOD Profile (Basic)", price: "1050", originalPrice: "2500", discount: "58%", time: "24-48 hours", includes: "TSH, FSH, LH, Prolactin, HbA1c" },
+            { name: "PCOD Profile (Extended)", price: "2550", originalPrice: "4800", discount: "46%", time: "24-48 hours", includes: "TSH, FSH, LH, Prolactin, HbA1c, CA - 125, Insulin (FBS & PPBS), Cortisol am & pm" },
+            { name: "Torch Profile", price: "1200", originalPrice: "2400", discount: "50%", time: "2-3 days", includes: "Toxoplasma IgG & IgM, Rubella IgG & IgM, CMV IgG & IgM, HSV - I & II IgG & IgM" },
+            { name: "Bad Obstetric History Profile", price: "4400", originalPrice: "8800", discount: "50%", time: "2-3 days", includes: "Torch Profile, TSH, Anti Cardiolipin Antibody (IgG & IgM), Anti Phospholipid Antibody (IgG & IgM), PT (Prothrombin Time), APTT, Lupus Anticoagulant, ANA by IF" },
+
+            // Additional Extended Packages
+            { name: "Male Fertility Profile (Basic)", price: "1200", originalPrice: "2400", discount: "50%", time: "2-3 days", includes: "TSH, Testosterone, Seminal Fluid Examination, HbA1c" },
+            { name: "Male Fertility Profile (Full)", price: "3000", originalPrice: "6000", discount: "50%", time: "2-3 days", includes: "TSH, FSH, LH, Prolactin, Testosterone, Free Testosterone, HbA1c, Seminal Fluid Examination, Anti Sperm Antibody" },
+            { name: "Pre Marriage Profile (Male)", price: "1950", originalPrice: "4800", discount: "59%", time: "24-48 hours", includes: "CBC, RBS, HIV by CLIA, HBsAg by CLIA, VDRL, Blood Group, Testosterone, Hb Electrophoresis, Seminal Fluid Examination" },
+            { name: "Pre Marriage Profile (Female)", price: "3150", originalPrice: "6000", discount: "47%", time: "24-48 hours", includes: "CBC, RBS, FSH, LH, Prolactin, Anti Mullerian Hormone (AMH), HIV by CLIA, HBsAg by CLIA, VDRL, Blood Group, Hb Electrophoresis" },
+            { name: "Anaemia Profile (Extended)", price: "3750", originalPrice: "7150", discount: "47%", time: "2-3 days", includes: "CBC, Iron, TIBC, % Transferrin Saturation, Ferritin, Folic Acid, Retic Count, Vitamin B12, Hb Electrophoresis, Stool For OBT (3 Days), LDH, Direct Coomb's Test, Indirect Coomb's Test" },
+            { name: "Arthritic Profile", price: "600", originalPrice: "1200", discount: "50%", time: "24 hours", includes: "CBC, ESR, RBS, Uric Acid, RA (Quantitative)" },
+            { name: "Osteoporosis Profile", price: "2050", originalPrice: "4650", discount: "55%", time: "24-48 hours", includes: "CBC, ESR, RBS, Uric Acid, Calcium, Phosphorous, RA (Quantitative), Cortisol am & pm, Vitamin B12 Level, Vitamin D" },
+            { name: "Liver Function Test (Minor)", price: "600", originalPrice: "1500", discount: "53%", time: "24 hours", includes: "Bilirubin - Total, Bilirubin (Conjugated), Bilirubin (Unconjugated), Bilirubin (Delta), SGPT, SGOT, Alkaline Phosphate, Total Protein, Albumin, Globulin, A:G Ratio" },
+            { name: "Liver Function Test (Major)", price: "1350", originalPrice: "4950", discount: "67%", time: "24 hours", includes: "CBC, ESR, Urine RM, SGPT, SGOT, Bilirubin - Total, Bilirubin (Conjugated), Bilirubin (Unconjugated), Bilirubin (Delta), Alkaline Phosphate, Total Protein, Albumin, Globulin, A:G Ratio, Amylase, Lipase, GGT, PT, HBsAg By CLIA" },
+            { name: "Iron Profile", price: "700", originalPrice: "2100", discount: "66%", time: "24 hours", includes: "CBC, Iron, TIBC, % Transferrin Saturation, Ferritin" },
+            { name: "Anaemia Profile (Basic)", price: "1350", originalPrice: "4100", discount: "67%", time: "24-48 hours", includes: "CBC, Iron, TIBC, % Transferrin Saturation, Ferritin, Folic Acid, Retic Count, Vitamin B12" },
+            { name: "Anaemia Profile (Super)", price: "1850", originalPrice: "5050", discount: "63%", time: "24-48 hours", includes: "CBC, Iron, TIBC, % Transferrin Saturation, Ferritin, Hb Electrophoresis, Retic Count, Vitamin B12, Folic Acid, Stool For OBT" },
+            { name: "Anaemia Profile (Advanced)", price: "2750", originalPrice: "5950", discount: "53%", time: "2-3 days", includes: "CBC, Iron, TIBC, % Transferrin Saturation, Ferritin, Hb Electrophoresis, Retic Count, Vitamin B12, Folic Acid, Stool For OBT (3 Days)" },
+
+            // Specialized Healthcare Packages
+            { name: "Cancer Screening Package (Female)", price: "6650", originalPrice: "", discount: "", time: "2-3 days", includes: "CBC, CA 19.9, CEA, AFP, CA 15.3, CA 125, Beta HCG, Protein Electrophoresis" },
+            { name: "Cancer Screening Package (Male)", price: "2700", originalPrice: "", discount: "", time: "2-3 days", includes: "CBC, CA 19.9, CEA, AFP, Beta HCG, PSA, Free PSA, Free PSA / PSA Ratio, Protein Electrophoresis" },
+            { name: "Cardiac Profile (Basic)", price: "1700", originalPrice: "5450", discount: "68%", time: "24 hours", includes: "CBC, RBS, Creatinine, EGFR, Sodium, Potassium, Chloride, Lipid Profile, Homocysteine, Hs Troponin-I, CPK MB, HS CRP" },
+            { name: "Cardiac Profile (Advanced)", price: "3500", originalPrice: "9450", discount: "62%", time: "24-48 hours", includes: "CBC, RBS, Creatinine, EGFR, Sodium, Potassium, Chloride, Lipid Profile, Homocysteine, hs Troponin-I, CPK MB, HS CRP, NT Pro - BNP, Apolipoprotein A1, Apolipoprotein B, Lipoprotein (a)" },
+            { name: "Lipid Profile (Basic)", price: "350", originalPrice: "700", discount: "50%", time: "24 hours", includes: "Cholesterol, Triglyceride, HDL-Cholesterol (Direct), Non-HDL Cholesterol, LDL-Cholesterol (Direct), VLDL-Cholesterol, Total Lipid" },
+            { name: "Lipid Profile (Extended)", price: "1000", originalPrice: "2000", discount: "50%", time: "24 hours", includes: "Cholesterol, Triglyceride, HDL-Cholesterol (Direct), Non-HDL Cholesterol, LDL-Cholesterol (Direct), VLDL-Cholesterol, Total Lipid, Apolipoprotein A1, Apolipoprotein B, Lipoprotein (a)" },
+            { name: "Antenatal Profile (Basic)", price: "500", originalPrice: "3150", discount: "84%", time: "24 hours", includes: "CBC, Urine RM, RBS, HIV by CLIA, HBsAg by CLIA, VDRL, Blood Group" },
+            { name: "Antenatal Profile (Advanced)", price: "600", originalPrice: "3700", discount: "84%", time: "24-48 hours", includes: "CBC, Urine RM, RBS, Creatinine, Prothrombin Time, HIV by CLIA, HBsAg by CLIA, VDRL, Blood Group" },
+            { name: "Pre Operative Profile (Basic)", price: "750", originalPrice: "3100", discount: "75%", time: "24 hours", includes: "CBC, Urine RM, RBS, Creatinine, BT-CT, HIV by CLIA, HBsAg by CLIA, Blood Group" },
+            { name: "Pre Operative Profile (Advanced)", price: "850", originalPrice: "3650", discount: "76%", time: "24-48 hours", includes: "CBC, Urine RM, RBS, SGPT, Creatinine, BT-CT, Prothrombin Time, HIV by CLIA, HBsAg by CLIA, Blood Group" },
+            { name: "Pre Operative Profile (Extended)", price: "1750", originalPrice: "5350", discount: "67%", time: "24-48 hours", includes: "CBC, Urine RM, RBS, SGPT, Bl.Urea, Creatinine, Sodium, Potassium, Chloride, BT-CT, Prothrombin Time, HIV by CLIA, HBsAg by CLIA, HCV by CLIA, Blood Group" },
+
+            // Thyroid Profiles
+            { name: "Thyroid Profile (Basic)", price: "300", originalPrice: "600", discount: "50%", time: "24 hours", includes: "T3, T4, TSH" },
+            { name: "Thyroid Profile (Advanced)", price: "300", originalPrice: "850", discount: "64%", time: "24-48 hours", includes: "Free T3, Free T4, TSH" },
+            { name: "Thyroid Profile (Diagnostic)", price: "800", originalPrice: "1750", discount: "54%", time: "2-3 days", includes: "Free T4, TSH, Anti TG, Anti TPO" },
+
+            // Full Body Check-ups
+            { name: "Full Body Check-up (Diabetic)", price: "1050", originalPrice: "5730", discount: "81%", time: "24-48 hours", includes: "CBC, Urine RM, FBS, PPBS, HbA1c, Bl.Urea, BUN, Creatinine, Urea/Creatinine Ratio, BUN/Creatinine Ratio, EGFR, Uric Acid, Calcium, Sodium, Potassium, Chloride, Phosphorous, Lipid Profile, SGPT, Urine Microalbumin" },
+            { name: "Full Body Check-up (Special Diabetic)", price: "3700", originalPrice: "12450", discount: "70%", time: "24-48 hours", includes: "CBC, Urine RM, FBS, PPBS, HbA1c, Bl.Urea, BUN, Creatinine, Urea/Creatinine Ratio, BUN/Creatinine Ratio, EGFR, Uric Acid, Calcium, Sodium, Potassium, Chloride, Phosphorous, SGPT, Lipid Profile, Urine Microalbumin, C Peptide (Fasting), Insulin (FBS & PPBS), Amylase & Lipase, Homa IR, Vitamin B12, Vitamin D" },
+            { name: "Full Body Check-up (Executive)", price: "2400", originalPrice: "7600", discount: "68%", time: "24-48 hours", includes: "CBC, Urine RM, FBS, Bl.Urea, Creatinine, BUN, Urea/Creatinine Ratio, BUN/Creatinine Ratio, EGFR, Uric Acid, Calcium, Phosphorous, SGPT, SGOT, SGOT/SGPT Ratio, Total Protein, Albumin, Globulin, A:G Ratio, Lipid Profile, Free T3, Free T4, TSH, PSA / CA-125, Vitamin B12, Vitamin D" },
+            { name: "Full Body Check-up (NRI)", price: "4000", originalPrice: "13400", discount: "70%", time: "2-3 days", includes: "CBC, ESR, Urine RM, FBS, Bl.Urea, Creatinine, EGFR, BUN, Urea/Creatinine Ratio, BUN/Creatinine Ratio, Uric Acid, Calcium, Phosphorous, SGPT, SGOT, SGOT/SGPT Ratio, Alkaline Phosphate, Lipid Profile, Homocysteine, RA, HbA1c, Iron Level, TIBC, Ferritin, % Transferrin Saturation, Free T3, Free T4, TSH, PSA / CA-125, Vitamin B12, Vitamin D, HIV by CLIA, HBsAg by CLIA, HCV by CLIA" },
+            { name: "Full Body Check-up (Customer's Choice)", price: "4500", originalPrice: "17950", discount: "75%", time: "2-3 days", includes: "CBC, ESR, Urine RM, FBS, PPBS, HbA1c, Bl.Urea, S. Creatinine, EGFR, BUN, Urea/Creatinine Ratio, BUN/Creatinine Ratio, Uric Acid, Sodium, Potassium, Chloride, SGPT, SGOT, SGOT/SGPT Ratio, Total Protein, Albumin, Globulin, A:G Ratio, Total Billirubin, Alkaline Phosphate, Calcium, Lipid Profile, RA, Phosphorous, Iron Level, TIBC, % Transferrin Saturation, UIBC, Ferritin, Folic Acid, Homocysteine, Apolipoprotein A1, Apolipoprotein B, Lipoprotein (a), Hs.CRP, IgE Level, Free T3, Free T4, TSH, PSA / CA-125, Vitamin B12, Vitamin D" },
+            { name: "Full Body Check-up (Super Executive)", price: "5000", originalPrice: "18850", discount: "73%", time: "2-3 days", includes: "CBC, ESR, Urine RM, FBS, Bl.Urea, BUN, Creatinine, EGFR, Urea/Creatinine Ratio, BUN/Creatinine Ratio, Uric Acid, Calcium, Phosphorous, Sodium, Potassium, Chloride, SGPT, SGOT, SGOT/SGPT Ratio, Total Bilirubin, Total Protein, Albumin, Globulin, A:G Ratio, Alkaline Phosphate, Lipid Profile, RA, HbA1c, Iron Level, TIBC, % Transferrin Saturation, Ferritin, Magnesium, Folic Acid, Homocysteine, Apolipoprotein A1, Apolipoprotein B, Lipoprotein (a), Blood Group, IgE Level, Free T3, Free T4, TSH, PSA / CA-125, Vitamin B12, Vitamin D, HIV by CLIA, HBsAg by CLIA, VDRL" }
         ]
     },
 
@@ -84,8 +140,8 @@ export const labInfo = {
     services: {
         homeSampleCollection: {
             available: true,
-            timing: "सुबह 8 बजे से रात 8 बजे तक (सोमवार से शनिवार)",
-            charges: "50 रुपये अतिरिक्त",
+            timing: "सुबह 7 बजे से रात 8 बजे तक (रविवार सहित)",
+            charges: "50 रुपये अतिरिक्त (पैकेज बुकिंग पर फ्री / No charge for packages)",
             booking: "एक दिन पहले फोन करके बुकिंग करें",
             areas: "5 किलोमीटर के दायरे में"
         },
@@ -125,8 +181,8 @@ export const labInfo = {
     faq: {
         "रिपोर्ट कब मिलेगी": "ज्यादातर रिपोर्ट्स 24 घंटे में तैयार हो जाती हैं, कुछ स्पेशल टेस्ट में 48-72 घंटे लग सकते हैं।",
         "फास्टिंग कितने घंटे": "फास्टिंग टेस्ट के लिए 10-12 घंटे खाली पेट रहना होता है, पानी पी सकते हैं।",
-        "होम कलेक्शन कैसे बुक करें": "एक दिन पहले फोन करें, सुबह 7-11 बजे के बीच सैंपल कलेक्ट किया जाएगा।",
-        "क्या रविवार को खुले हैं": "हाँ, रविवार को सुबह 8 बजे से दोपहर 2 बजे तक खुले हैं।",
+        "होम कलेक्शन कैसे बुक करें": "एक दिन पहले फोन करें, सुबह 7 बजे से रात 8 बजे के बीच सैंपल कलेक्ट किया जाएगा।",
+        "क्या रविवार को खुले हैं": "हाँ, रविवार को भी सुबह 7 बजे से रात 8 बजे तक खुले हैं।",
         "ऑनलाइन रिपोर्ट कैसे देखें": "व्हाट्सएप पर PDF भेज दी जाती है, या ऑनलाइन पोर्टल पर देख सकते हैं।"
     }
 };
@@ -138,26 +194,32 @@ export const systemPrompt = `आप/તમે 'પ્રિયા' છો - સ�
 - ગ્રાહકના દરેક પ્રશ્નનો સચોટ અને વિગતવાર જવાબ આપવો (Explain like an expert).
 - ગ્રાહકની પૂછવાની રીત (Tone) મુજબ તમારી વાત કરવાની શૈલી બદલો (Be Adaptive).
 - જો ગ્રાહક ચિંતિત હોય, તો તેને આશ્વાસન આપો. જો ઉતાવળમાં હોય, તો ઝડપથી માહિતી આપો.
+- Always maintain strong memory context: Remember the previous messages, the customers' concerns, and the tests they're asking about to provide a fluent and seamless conversation.
 
 🌐 ભાષા ઓળખ (LANGUAGE DETECTION):
-- ગ્રાહક જે ભાષામાં બોલે એ જ ભાષામાં જવાબ આપો (Hindi or Gujarati).
+- ગ્રાહક જે ભાષામાં બોલે એ જ ભાષામાં જવાબ આપો (Hindi, Gujarati, English).
 - જો ગ્રાહક મિશ્રિત ભાષા (Hinglish/Gujlish) બોલે, તો અત્યંત કુદરતી અને માનવીય રીતે વાત કરો.
 
-🧠 આંતરદ્રષ્ટિ અને બુદ્ધિ (Intelligence):
+🧠 આંતરદ્રષ્ટિ અને બુદ્ધિ (Intelligence & Smart Package Suggestions):
+- IMPORTANT RULE: Always be aware of our health packages. If a customer is asking to perform multiple individual tests, cross-check the tests with our packages. If they match the tests included in one of our packages (e.g., Allergy Profile, Metabolic Panel, Alcohol Impact Profile, PCOD Profile), PROACTIVELY SUGGEST the package to the customer. Explain that buying the package provides a huge discount and is more comprehensive.
 - ફક્ત કિંમત ન જણાવો, જો શક્ય હોય તો ટેસ્ટ કેમ જરૂરી છે તે પણ સમજાવો (Use Expert Insights).
 - એકની એક વાત વારંવાર ન દોહરાવો. દર વખતે અલગ શબ્દો વાપરો.
 - 'રોબોટ' જેવું ન લાગે તેનું ખાસ ધ્યાન રાખો.
 
 📋 મુખ્ય માહિતી / મુખ્ય માહિતી:
-- સમય/સમય: સવારે 7 થી રાતે 9 (રવિવાર: 8 થી 2).
+- સમય/સમય: દરરોજ સવારે 7 થી રાતે 8 કલાક સુધી (રવિવારે પણ 7 થી 8 / Everyday 7 AM to 8 PM including Sunday).
 - સ્થળ/સ્થળ: મેઈન રોડ, સ્ટેટ બેંકની સામે.
-- હોમ કલેક્શન/હોમ કલેક્શન: ₹50 વધારાનો ચાર્જ, 5 કિમીની અંદર.
+- હોમ કલેક્શન/હોમ કલેક્શન: 50 વધારાનો ચાર્જ, 5 કિમીની અંદર. (નોંધ: કોઈપણ હેલ્થ પેકેજ જોડે હોમ કલેક્શન બિલકુલ ફ્રી છે / Free home visit on packages).
 
-💉 કિંમતો (Prices) - હમેશા 'Rupay' શબ્દ વાપરો, 'RS' નહીં:
-- CBC: ₹250, શુગર: ₹80, થાઈરોઈડ: ₹550, લિપિડ પ્રોફાઈલ: ₹450.
+💉 કિંમતો (Prices) - STRICT RULE: ALWAYS use the word "rupees" in English or "रुपये/રુપિયા" in Hindi/Gujarati. NEVER use "rs", "Rs.", "rs.", or "RS". Do not use symbol ₹, spell out the word rupees.
+- CBC: 250 rupees, શુગર: 80 rupees, થાઈરોઈડ: 550 rupees, લિપિડ પ્રોફાઈલ: 450 rupees.
 - લિપિડ પ્રોફાઈલ માટે 12 કલાકનો ઉપવાસ અનિવાર્ય છે.
 
-⚠️ ખાસ સૂચના:
+⚠️ ખાસ સૂચના / STRICT INSTRUCTIONS:
+- NO PROACTIVE HOME TEST SUGGESTIONS: NEVER utter the words "home collection" or "home visit" proactively. ONLY offer or mention home collection IF the customer explicitly, directly asks for it. Otherwise, assume walk-in.
+- NO APPOINTMENT FOR WALK-IN: There is NO booking required for walk-in. If the customer wants to visit the lab directly, simply tell them NO prior booking or appointment is required and they can just walk in.
+- PACKAGE HOME VISIT IS FREE: If a customer books any health package, the home visit charge is absolutely FREE (0 rupees). Do not add the 50 rupees charge.
+- SUNDAY TIMING: The lab is fully open on Sundays as well, from 7 AM to 8 PM.
 - તબીબી સલાહ (Doctor-level advice) ન આપવી, પણ ટેસ્ટના મહત્વ વિશે ચોક્કસ જણાવવું.
 - ટૂંકા પણ અર્થપૂર્ણ જવાબ આપો (2-3 લાઈન).
 
