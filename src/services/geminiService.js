@@ -5,9 +5,9 @@ import { labInfo } from '../data/labKnowledge';
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
-// Professional system prompt - Priya the receptionist (Bilingual: Hindi + Gujarati)
-const SYSTEM_PROMPT = `આप/તમે 'પ્રિયા' છો - સન પેથોલોજી લેબના વરિષ્ઠ રિસેપ્શનિસ્ટ। 
-आप 'प्रिया' हैं - सन पैथोलॉजी लैब के वरिष्ठ रिसेप्शनिस्ट।
+// Professional system prompt - Raj the receptionist (Bilingual: Hindi + Gujarati)
+const SYSTEM_PROMPT = `આप/તમે 'રાજ' છો - સન પેથોલોજી લેબના વરિષ્ઠ રિસેપ્શનિસ્ટ। 
+आप 'राज' हैं - सन पैथोलॉजी लैब के वरिष्ठ रिसेप्शनिस्ट।
 
 🌐 भाषा पहचान (LANGUAGE DETECTION - बहुत महत्वपूर्ण):
 - यदि ग्राहक हिंदी में बोले, तो **शुद्ध और स्पष्ट हिंदी** में उत्तर दें (Avoid English fillers unless technical).
@@ -16,7 +16,7 @@ const SYSTEM_PROMPT = `આप/તમે 'પ્રિયા' છો - સન પ
 - ગ્રાહક જે ભાષામાં બોલે એ જ ભાષામાં જવાब આપો
 
 🎯 आपकी पहचान / તમારી ઓળખ:
-- नाम: प्रिया / નામ: પ્રિયા
+- नाम: राज / નામ: રાજ
 - 5 वर्षों से लैब में कार्यरत / 5 વર્ષથી લેબમાં કાર્યરત
 - विनम्र, सहायक और पेशेवर / વિનમ્ર, મદદગાર અને વ્યાવસાયિક
 
@@ -140,7 +140,7 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
         // Gemini 2.0 Flash has a large context window, so we can pass more history.
         const historyText = conversationHistory
             .slice(-50) // Increased from 20 to 50 to remember early details
-            .map(msg => `${msg.role === 'ai' ? 'Priya (You)' : 'Customer'}: ${msg.text}`)
+            .map(msg => `${msg.role === 'ai' ? 'Raj (You)' : 'Customer'}: ${msg.text}`)
             .join('\n');
 
         // Get previous AI responses to avoid repetition
@@ -271,9 +271,9 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
             .replace(/\*+/g, '')
             .replace(/#+/g, '')
             .replace(/^["']|["']$/g, '')
-            .replace(/^પ્રિયા:\s*/i, '')  // Remove "Priya:" prefix (Gujarati)
-            .replace(/^प्रिया:\s*/i, '')   // Remove "Priya:" prefix (Hindi)
-            .replace(/^Priya:\s*/i, '')   // Remove "Priya:" prefix (English)
+            .replace(/^રાજ:\s*/i, '')  // Remove "Raj:" prefix (Gujarati)
+            .replace(/^राज:\s*/i, '')   // Remove "Raj:" prefix (Hindi)
+            .replace(/^Raj:\s*/i, '')   // Remove "Raj:" prefix (English)
             .replace(/^\[.*?\]\s*/g, '');   // Remove any bracketed prefixes
 
         return aiResponse;

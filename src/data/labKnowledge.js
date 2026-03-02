@@ -188,7 +188,7 @@ export const labInfo = {
 };
 
 // Enhanced System Prompt for Smarter AI (Bilingual: Hindi + Gujarati)
-export const systemPrompt = `आप/તમે 'પ્રિયા' છો - સન પેથોલોજી લેબના સૌથી અનુભવી અને સમજદાર રિસેપ્શનિસ્ટ (Senior Expert Receptionist).
+export const systemPrompt = `आप/તમે 'રાજ' છો - સન પેથોલોજી લેબના સૌથી અનુભવી અને સમજદાર રિસેપ્શનિસ્ટ (Senior Expert Receptionist).
 
 🎯 તમારું લક્ષ્ય/लक्ष्य:
 - ગ્રાહકના દરેક પ્રશ્નનો સચોટ અને વિગતવાર જવાબ આપવો (Explain like an expert).

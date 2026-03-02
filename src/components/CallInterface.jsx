@@ -73,8 +73,8 @@ const AlertIcon = ({ size = 16 }) => (
     </svg>
 )
 
-// Welcome message - Priya introduces herself
-const WELCOME_MESSAGE = "नमस्कार, सन पैथोलॉजी लैब में आपका स्वागत है। मैं प्रিয়া हूँ, मैं आपकी कैसे सहायता कर सकती हूँ?";
+// Welcome message - Raj introduces himself
+const WELCOME_MESSAGE = "नमस्कार, सन पैथोलॉजी लैब में आपका स्वागत है। मैं राज हूँ, मैं आपकी कैसे सहायता कर सकता हूँ?";
 
 function CallInterface() {
     const {
@@ -325,7 +325,7 @@ function CallInterface() {
             case 'processing':
                 return { text: 'Processing...', icon: <LoaderIcon /> };
             case 'speaking':
-                return { text: 'Priya is speaking...', icon: <VolumeIcon /> };
+                return { text: 'Raj is speaking...', icon: <VolumeIcon /> };
             default:
                 return { text: 'Ready', icon: null };
         }
@@ -338,7 +338,7 @@ function CallInterface() {
             {/* Header */}
             <div className="call-header">
                 <h1>AI Voice Assistant</h1>
-                <p>Talk to Priya, our Hindi-speaking AI receptionist</p>
+                <p>Talk to Raj, our Hindi-speaking AI receptionist</p>
             </div>
 
             {/* Status Card */}
@@ -346,7 +346,7 @@ function CallInterface() {
                 <h2>{callState === 'idle' ? 'Ready to Connect' : 'Call in Progress'}</h2>
                 <p>
                     {callState === 'idle'
-                        ? 'Click the call button to speak with Priya'
+                        ? 'Click the call button to speak with Raj'
                         : statusInfo.text
                     }
                 </p>
@@ -423,7 +423,7 @@ function CallInterface() {
                         {transcript.map((msg) => (
                             <div key={msg.id} className={`transcript-message ${msg.role}`}>
                                 <div className="sender">
-                                    {msg.role === 'ai' ? <><BotIcon /> Priya</> : <><UserIcon /> You</>}
+                                    {msg.role === 'ai' ? <><BotIcon /> Raj</> : <><UserIcon /> You</>}
                                 </div>
                                 <div className="text">{msg.text}</div>
                             </div>
