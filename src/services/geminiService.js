@@ -139,7 +139,10 @@ export const transcribeAudio = async (audioBlob) => {
         }
 
         const data = await response.json();
-        const transcription = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const textPart = parts.filter(p => p.text !== undefined).pop();
+        const transcription = textPart?.text || "";
         return transcription.trim();
     } catch (error) {
         console.error('Transcription error:', error);
@@ -260,8 +263,8 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
                     parts: [{ text: prompt }]
                 }],
                 generationConfig: {
-                    temperature: 0.3,  // Lowered from 0.9 to ensure logic, memory retention, and less repetition
-                    maxOutputTokens: 100,
+                    temperature: 0.3,
+                    maxOutputTokens: 400,
                     topP: 0.95,
                     topK: 40
                 },
@@ -281,7 +284,10 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
         }
 
         const data = await response.json();
-        let aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+        // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const textPart = parts.filter(p => p.text !== undefined).pop();
+        let aiResponse = textPart?.text || "";
 
         // Clean response
         aiResponse = aiResponse.trim()
