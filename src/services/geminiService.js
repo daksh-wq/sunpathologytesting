@@ -5,6 +5,23 @@ import { labInfo } from '../data/labKnowledge';
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
+// Retry logic to handle 429 Too Many Requests
+const fetchWithRetry = async (url, options, maxRetries = 3) => {
+    let delay = 1000;
+    for (let i = 0; i < maxRetries; i++) {
+        const response = await fetch(url, options);
+        if (response.status === 429) {
+            console.warn(`Gemini API rate limit exceeded (429). Retrying in ${delay}ms... (Attempt ${i + 1} of ${maxRetries})`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2; // Exponential backoff
+            continue;
+        }
+        return response;
+    }
+    // Final attempt if all retries hit 429
+    return fetch(url, options);
+};
+
 // Professional system prompt - Raj the receptionist (Bilingual: Hindi + Gujarati)
 const SYSTEM_PROMPT = `આप/તમે 'રાજ' છો - સન પેથોલોજી લેબના વરિષ્ઠ રિસેપ્શનિસ્ટ। 
 आप 'राज' हैं - सन पैथोलॉजी लैब के वरिष्ठ रिसेप्शनिस्ट।
@@ -91,7 +108,7 @@ export const transcribeAudio = async (audioBlob) => {
     try {
         const base64Audio = await audioToBase64(audioBlob);
 
-        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+        const response = await fetchWithRetry(`${API_URL}?key=${API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -233,7 +250,7 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
 
     तुम्हारा जवाब (ગ્રાહકની ભાષામાં / ग्राहक की भाषा में - natural and expert, 1-2 lines):`;
 
-        const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+        const response = await fetchWithRetry(`${API_URL}?key=${API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
