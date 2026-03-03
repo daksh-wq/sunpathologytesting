@@ -3,7 +3,7 @@ import { testPrices, getTestPreparation } from '../data/testPrices';
 import { labInfo } from '../data/labKnowledge';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 // Retry logic to handle 429 Too Many Requests
 const fetchWithRetry = async (url, options, maxRetries = 3) => {
