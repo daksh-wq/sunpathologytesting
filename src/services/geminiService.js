@@ -3,7 +3,7 @@ import { testPrices, getTestPreparation } from '../data/testPrices';
 import { labInfo } from '../data/labKnowledge';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 // Retry logic to handle 429 Too Many Requests
 const fetchWithRetry = async (url, options, maxRetries = 3) => {
@@ -139,7 +139,7 @@ export const transcribeAudio = async (audioBlob) => {
         }
 
         const data = await response.json();
-        // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
+        // gemini-2.0-flash returns thinking in earlier parts, actual text in the last part
         const parts = data.candidates?.[0]?.content?.parts || [];
         const textPart = parts.filter(p => p.text !== undefined).pop();
         const transcription = textPart?.text || "";
@@ -286,7 +286,7 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
         }
 
         const data = await response.json();
-        // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
+        // gemini-2.0-flash returns thinking in earlier parts, actual text in the last part
         const parts = data.candidates?.[0]?.content?.parts || [];
         const textPart = parts.filter(p => p.text !== undefined).pop();
         let aiResponse = textPart?.text || "";
