@@ -145,8 +145,21 @@ export const transcribeAudio = async (audioBlob, useFallback = false) => {
         // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
         const parts = data.candidates?.[0]?.content?.parts || [];
         const textPart = parts.filter(p => p.text !== undefined).pop();
-        const transcription = textPart?.text || "";
-        return transcription.trim();
+        let transcription = textPart?.text || "";
+
+        // Filter out Gemini audio hallucination text (like timestamps "00:00 00:02")
+        transcription = transcription
+            .replace(/\b\d{2}:\d{2}\b/g, '') // Remove timestamps like 00:00
+            .replace(/\b\d{2}:\d{2}:\d{2}\b/g, '') // Remove timestamps like 00:00:00
+            .trim();
+
+        // If the transcription is empty after filtering timestamps, throw an error
+        // so the system doesn't try to generate a response to nothing
+        if (!transcription) {
+            throw new Error("Empty or noise-only transcription");
+        }
+
+        return transcription;
     } catch (error) {
         console.error('Transcription error:', error);
         throw error;
