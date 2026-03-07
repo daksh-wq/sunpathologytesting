@@ -43,18 +43,21 @@ export const labInfo = {
         }
     },
 
-    // Location & Contact
+    // Location & Contact - Sun Pathology Branches
     location: {
-        address: "मेन रोड, सिटी सेंटर के पास",
-        landmarks: [
-            "स्टेट बैंक के सामने",
-            "सिटी हॉस्पिटल से 200 मीटर",
-            "मुख्य बाज़ार के पास"
-        ],
-        directions: {
-            fromBusStand: "बस स्टैंड से 10 मिनट की दूरी पर, ऑटो से 30 रुपये",
-            fromRailwayStation: "रेलवे स्टेशन से 15 मिनट, ऑटो से 50 रुपये"
-        }
+        primaryHeadquarters: "Ahmedabad, Gujarat",
+        allBranches: [
+            { name: "Science City", address: "Science City Road, Sola", landmark: "CIMS Hospital के सामने / Opposite CIMS Hospital", directions: "सोला ब्रिज से साइंस सिटी की तरफ जाते हुए बायीं तरफ (Left side coming from Sola Bridge)." },
+            { name: "Thaltej", address: "S.G. Highway, Thaltej", landmark: "Acropolis Mall के पास / Near Acropolis Mall", directions: "SG हाईवे सर्विस रोड पर, PVR Acropolis के ठीक आगे (On service road just past PVR)." },
+            { name: "Satellite", address: "132 Ring Road, Satellite", landmark: "Shivranjani Crossroads के पास / Near Shivranjani", directions: "शिवरंजनी से नेहरूनगर की तरफ 200 मीटर आगे दायीं तरफ (200m towards Nehrunagar from Shivranjani on the right)." },
+            { name: "Akhbarnagar", address: "Akhbarnagar Circle, Nava Vadaj", landmark: "Akhbarnagar BRTS Stop के पास / Near BRTS", directions: "अखबारनगर अंडरपास सर्कल के बिल्कुल पास (Right at the Akhbarnagar underpass circle)." },
+            { name: "Maninagar", address: "Kankaria Road, Maninagar", landmark: "Kankaria Lake Gate 1 के सामने / Opp Kankaria Gate 1", directions: "कांकरिया लेक के मुख्य टिकट काउंटर के ठीक सामने (Just opposite the main Kankaria Lake entry ticket counter)." },
+            { name: "Bopal", address: "Bopal-Ambli Road, Bopal", landmark: "Bopal TRP Mall के पास / Near TRP Mall", directions: "इस्कॉन से आते समय TRP मॉल से आधा किलोमीटर पहले (Half km before TRP mall when coming from Iscon)." },
+            { name: "Gota", address: "Gota Crossroads, SG Highway", landmark: "Vande Mataram City के पास / Near Vande Mataram", directions: "गोटा में वन्दे मातरम बिल्डिंग के पास (Near the Vande Mataram icon building in Gota)." },
+            { name: "Vastral", address: "Vastral Ring Road", landmark: "Nirant Cross Road Metro Station के पास / Near Metro", directions: "निरंत क्रॉस रोड मेट्रो स्टेशन से वॉकिंग डिस्टेंस पर (Walking distance from Nirant Metro station)." },
+            { name: "Shahibaug", address: "Shahibaug Underbridge", landmark: "Rajasthan Hospital के पास / Near Rajasthan Hospital", directions: "राजस्थान हॉस्पिटल से सिर्फ 100 मीटर की दूरी पर (Just 100 meters away from Rajasthan Hosp)." },
+            { name: "Sattadhar", address: "Sattadhar Crossroads, Ghatlodiya", landmark: "Sattadhar Society के पास / Near Sattadhar Society", directions: "सत्ताधार क्रॉसरोड मुख्य सर्कल पर ही (Right at the Sattadhar crossroad main circle)." }
+        ]
     },
 
     // Complete Test Menu with Prices and Timing

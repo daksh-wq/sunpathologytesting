@@ -214,6 +214,11 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
             return `- ${p.name}: ₹${p.price}${originalPriceStr} | Tests Included: ${p.includes}`;
         }).join('\n');
 
+        // Create Branches Context for Location Guided Routing
+        const branchesContext = labInfo.location.allBranches.map(b => {
+            return `- **${b.name} Branch**: ${b.address} (Landmark: ${b.landmark}). Directions: ${b.directions}`;
+        }).join('\n');
+
         const prompt = `
     ${SYSTEM_PROMPT}
 
@@ -246,12 +251,20 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
 - Timing: हर दिन सुबह 7 बजे से रात 8 बजे तक(रविवार सहित / Sunday included)
     - Sunday: ${labInfo.workingHours.sunday.hindi}
 
+    📍 ** LAB LOCATIONS & DIRECTIONS (CRITICAL ROUTING INTELLIGENCE) **:
+    We have 10 branches in ${labInfo.location.primaryHeadquarters}:
+    ${branchesContext}
+    - If a customer asks "Where are you located?" or "Tumhara lab kahan hai?", DO NOT just list all branches. FIRST, politely ask them which AREA they are calling from.
+    - Once they mention their area/location, analyze the list above and guide them to the NEAREST branch.
+    - Provide the EXACT LANDMARK and DIRECTIONS explicitly from the list. 
+    - Example: "सर, आपके सबसे नज़दीक हमारी Science City ब्रांच है। यह Sola Bridge से साइंस सिटी की तरफ जाते हुए बायीं तरफ, CIMS Hospital के बिल्कुल सामने है।"
+
     🚶 ** WALK - IN POLICY(CRITICAL - ALWAYS FOLLOW) **:
 - लैब में आने के लिए कोई बुकिंग या अपॉइंटमेंट की ज़रूरत नहीं है।
 - NO BOOKING, NO APPOINTMENT, NO PRIOR REGISTRATION needed for walk -in.
     - Simply tell the customer: "आप सीधे लैब में आ सकते हैं, कोई बुकिंग की ज़रूरत नहीं है।"
-    - If a customer says they want to come to the lab or get a test done, ASSUME WALK - IN.Just tell them the timing, price, and any fasting instructions.
-    - DO NOT ask for name, phone number, age, or address for walk - ins.They just come in.
+    - If a customer says they want to come to the lab or get a test done, ASSUME WALK - IN. Just tell them the timing, price, and if they need directions, route them using the Location Intelligence above.
+    - DO NOT ask for name, phone number, age, or address for walk - ins. They just come in.
 
     🏠 ** HOME COLLECTION BOOKING FLOW (STRICT STEP-BY-STEP) **:
 - 🚫 NEVER mention or suggest home collection proactively. Only discuss it IF the customer explicitly asks.
