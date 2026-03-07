@@ -289,13 +289,13 @@ function CallInterface() {
                 return;
             }
 
-            await addMessage('user', userText);
-
-            // IMPORTANT: Use LOCAL context construction to include the new message IMMEDIATELY
-            // React state 'transcript' won't update until next render, which is too late for this function.
-            // Also use latestTranscriptRef to ensure we have the most up-to-date history from previous renders.
+            // IMPORTANT: Build context BEFORE awaiting addMessage to guarantee no duplicate loops
             const currentContext = [...latestTranscriptRef.current, { role: 'user', text: userText }];
 
+            // Add to UI
+            await addMessage('user', userText);
+
+            // Fetch AI Response
             const aiResponse = await generateResponse(userText, currentContext);
             await addMessage('ai', aiResponse);
 
