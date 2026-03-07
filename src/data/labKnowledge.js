@@ -2,8 +2,27 @@
 // Enhanced information for intelligent AI responses
 
 export const labInfo = {
-    name: "सन पैथोलॉजी लैब",
-    nameEnglish: "Sun Pathology Lab",
+    name: "सन पैथोलॉजी लैब और रिसर्च इंस्टीट्यूट",
+    nameEnglish: "Sun Pathology Laboratory and Research Institute",
+    established: 1998,
+    experienceYears: 27,
+    tagline: "A Complete Guide to Diagnostic Excellence",
+
+    // Organization Details
+    organization: {
+        headquarters: "Ahmedabad, Gujarat",
+        branches: ["Science City", "Thaltej", "Satellite", "Akhbarnagar", "Maninagar", "Bopal", "Gota", "Vastral", "Shahibaug", "Sattadhar"],
+        certifications: ["ISO 9000:2015", "NABL Accreditation", "Six Sigma Performance (126 parameters)"],
+        equipment: ["Vitros 5600 and 7600 Integrated Dry Chemistry Analyzers", "Sysmex Hematology and Coagulation Analyzers", "Ortho Workstation Blood Group Analyzer", "Total Lab Automation"],
+        features: ["Less Pain Needle Technology (ideal for kids/elderly)", "AI-Based WhatsApp Services (079 6700 6700)"],
+        pathologists: ["Dr. Arpita Shah", "Dr. Harsha Pandya", "Dr. Anand Parikh"]
+    },
+
+    // Achievements & Social Impact
+    achievements: {
+        milestones: "1.9 Million+ Health Check-Ups, 30 Million+ Tests Conducted, 35+ Corporate Collaborations",
+        awards: ["Best Pathology Lab of Ahmedabad", "Pride of Nation Award", "Legend of Gujarat Award", "Emerging Gujarat Award"]
+    },
 
     // Working Hours
     workingHours: {
@@ -164,7 +183,16 @@ export const labInfo = {
         fasting: "फास्टिंग टेस्ट के लिए 10-12 घंटे का उपवास ज़रूरी है। पानी पी सकते हैं।",
         thyroid: "थायरॉइड टेस्ट सुबह खाली पेट कराना बेहतर है।",
         lipidProfile: "लिपिड प्रोफाइल के लिए 12 घंटे का उपवास ज़रूरी है।",
-        urine: "यूरિન સેમ્પલ માટે મિડસ્ટ્રીમ યુરિન આપો, સવારનું પહેલું સેમ્પલ શ્રેષ્ઠ છે।"
+        urine: "यूरिन સેમ્પલ માટે મિડસ્ટ્રીમ યુરિન આપો, સવારનું પહેલું સેમ્પલ શ્રેષ્ઠ છે।"
+    },
+
+    // Policies
+    policies: {
+        refund: "Refunds are processed only for cancellations made *before* sample collection.",
+        confidentiality: "All patient information is securely stored and shared only with authorized individuals.",
+        turnaround: "Routine tests are delivered on the same day. Special tests have specific times.",
+        taxes: "No GST Charges: As a medical firm, GST is not applicable.",
+        reportGuidance: "The laboratory does not provide medical consultations, but helps patients interpret reports briefly."
     },
 
     // Expert Insights for explaining "Why" to customers
@@ -207,9 +235,12 @@ export const systemPrompt = `आप/તમે 'રાજ' છો - સન પે
 - 'રોબોટ' જેવું ન લાગે તેનું ખાસ ધ્યાન રાખો.
 
 📋 મુખ્ય માહિતી / મુખ્ય માહિતી:
+- નામ/નામ: Sun Pathology Laboratory and Research Institute (Established 1998, 27 years experience).
 - સમય/સમય: દરરોજ સવારે 7 થી રાતે 8 કલાક સુધી (રવિવારે પણ 7 થી 8 / Everyday 7 AM to 8 PM including Sunday).
-- સ્થળ/સ્થળ: મેઈન રોડ, સ્ટેટ બેંકની સામે.
+- સ્થળ/સ્થળ: મેઈન રોડ, સ્ટેટ બેંકની સામે. It has 10 centers in Ahmedabad (like Science City, Bopal, etc.)
 - હોમ કલેક્શન/હોમ કલેક્શન: 50 વધારાનો ચાર્જ, 5 કિમીની અંદર. (નોંધ: કોઈપણ હેલ્થ પેકેજ જોડે હોમ કલેક્શન બિલકુલ ફ્રી છે / Free home visit on packages).
+- Quality/Trust: ISO 9000:2015 certified and NABL accredited. Over 1.9 Million check-ups done.
+- Policies: Refunds only before sample collection. Reports on the same day for routine tests. No GST.
 
 💉 કિંમતો (Prices) - STRICT RULE: ALWAYS use the word "rupees" in English or "रुपये/રુપિયા" in Hindi/Gujarati. NEVER use "rs", "Rs.", "rs.", or "RS". Do not use symbol ₹, spell out the word rupees.
 - CBC: 250 rupees, શુગર: 80 rupees, થાઈરોઈડ: 550 rupees, લિપિડ પ્રોફાઈલ: 450 rupees.
