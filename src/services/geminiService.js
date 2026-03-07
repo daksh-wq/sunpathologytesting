@@ -3,7 +3,8 @@ import { testPrices, getTestPreparation } from '../data/testPrices';
 import { labInfo } from '../data/labKnowledge';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const API_URL_PRIMARY = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const API_URL_FALLBACK = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
 
 // Retry logic to handle 429 Too Many Requests
 const fetchWithRetry = async (url, options, maxRetries = 3) => {
@@ -101,12 +102,12 @@ const audioToBase64 = async (audioBlob) => {
     });
 };
 
-// Transcribe audio using Gemini
-export const transcribeAudio = async (audioBlob) => {
+export const transcribeAudio = async (audioBlob, useFallback = false) => {
     try {
         const base64Audio = await audioToBase64(audioBlob);
+        const activeUrl = useFallback ? API_URL_FALLBACK : API_URL_PRIMARY;
 
-        const response = await fetchWithRetry(`${API_URL}?key = ${API_KEY} `, {
+        const response = await fetchWithRetry(`${activeUrl}?key=${API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -133,6 +134,10 @@ export const transcribeAudio = async (audioBlob) => {
         });
 
         if (!response.ok) {
+            if (!useFallback) {
+                console.warn(`Primary model transcription failed (Status: ${response.status}). Retrying with fallback model...`);
+                return await transcribeAudio(audioBlob, true);
+            }
             throw new Error(`Gemini API error: ${response.status} `);
         }
 
@@ -148,8 +153,7 @@ export const transcribeAudio = async (audioBlob) => {
     }
 };
 
-// Generate human-like response
-export const generateResponse = async (userMessage, conversationHistory = []) => {
+export const generateResponse = async (userMessage, conversationHistory = [], useFallback = false) => {
     try {
         // Detect Initial Query (First thing customer said)
         const initialQuery = conversationHistory.find(msg => msg.role === 'user')?.text || userMessage;
@@ -253,7 +257,9 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
 
     तुम्हारा जवाब(ग्राहक की भाषा में, 1 - 3 lines, natural conversational tone, friendly receptionist): `;
 
-        const response = await fetchWithRetry(`${API_URL}?key = ${API_KEY} `, {
+        const activeUrl = useFallback ? API_URL_FALLBACK : API_URL_PRIMARY;
+
+        const response = await fetchWithRetry(`${activeUrl}?key=${API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -278,6 +284,10 @@ export const generateResponse = async (userMessage, conversationHistory = []) =>
         });
 
         if (!response.ok) {
+            if (!useFallback) {
+                console.warn(`Primary model response generation failed (Status: ${response.status}). Retrying with fallback model...`);
+                return await generateResponse(userMessage, conversationHistory, true);
+            }
             const errorData = await response.text();
             console.error('Gemini error:', errorData);
             throw new Error(`API error: ${response.status} `);
