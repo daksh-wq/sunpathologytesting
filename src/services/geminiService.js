@@ -196,6 +196,12 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
             return `- ${t.name}: ₹${t.price} (MRP ₹${t.mrp}, ${discount}% off)${prepString} `;
         }).join('\n');
 
+        // Create Packages Context for Smart Upselling
+        const packagesContext = labInfo.tests.packages.map(p => {
+            const originalPriceStr = p.originalPrice ? ` (Original: ₹${p.originalPrice}, Discount: ${p.discount})` : "";
+            return `- ${p.name}: ₹${p.price}${originalPriceStr} | Tests Included: ${p.includes}`;
+        }).join('\n');
+
         const prompt = `
     ${SYSTEM_PROMPT}
 
@@ -244,8 +250,14 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     💰 ** TEST PRICE LIST(Official Data) **:
     ${priceListContext}
     
+    📦 ** HEALTH PACKAGES (SMART UPSELLING) **:
+    ${packagesContext}
+    - CRITICAL RULE: If a customer asks for MULTIPLE individual tests (e.g., CBC + Thyroid + Sugar), you MUST check if these tests are grouped in any package above.
+    - If a package is a better deal or strongly covers their needs, STRONGLY SUGGEST the package instead of doing individual totals.
+    - Highlight the massive discount logically to convince them. E.g: "Sir, CBC and Sugar will cost you X separately, but if you take our Basic Health Checkup for just 999, you get CBC, Sugar, Urine, and Liver tests combined at a huge discount!"
+
     🧮 ** TOTAL CALCULATION **:
-- If customer asks for multiple tests, calculate total automatically.
+- If customer asks for multiple tests and NO package fits, calculate total automatically.
     - Example: "CBC (170 rupees) + TSH (150 rupees) = 320 rupees"
 
     📝 FULL CONVERSATION CHRONOLOGY(Context):

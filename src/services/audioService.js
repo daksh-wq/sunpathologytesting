@@ -10,6 +10,7 @@ class AudioService {
         this.silenceTimeout = null;
         this.audioContext = null;
         this.analyser = null;
+        this.processedStream = null;
 
         // Silero VAD state
         this.sileroVAD = null;
@@ -35,20 +36,50 @@ class AudioService {
             // 1. Create Source
             const source = this.audioContext.createMediaStreamSource(this.stream);
 
-            // 2. Create Bandpass Filter (Focus on Human Voice Range: 300Hz - 3400Hz)
-            // This physically removes low rumbles and high hisses/clicks before analysis
-            const bandpassFilter = this.audioContext.createBiquadFilter();
-            bandpassFilter.type = 'bandpass';
-            bandpassFilter.frequency.value = 1700; // Center frequency
-            bandpassFilter.Q.value = 1.0; // Width of the band
+            // --- Production-Grade Filtering for RECORDING (Clean Audio for AI Transcription) ---
+            // 2A. Highpass filter to remove low-frequency rumbles (wind, AC, desk bumps, street rumble)
+            const lowcutFilter = this.audioContext.createBiquadFilter();
+            lowcutFilter.type = 'highpass';
+            lowcutFilter.frequency.value = 85;
 
-            // 3. Connect Filter Chain
+            // 2B. Lowpass filter to remove high-frequency hiss/static/electronic whine
+            const highcutFilter = this.audioContext.createBiquadFilter();
+            highcutFilter.type = 'lowpass';
+            highcutFilter.frequency.value = 5500;
+
+            // 2C. Dynamics Compressor (Normalize volume, push down loud background bumps, lift quiet voices)
+            const compressor = this.audioContext.createDynamicsCompressor();
+            compressor.threshold.value = -35;
+            compressor.knee.value = 12;
+            compressor.ratio.value = 4;
+            compressor.attack.value = 0.05;
+            compressor.release.value = 0.25;
+
+            // 2D. Final Output Node for Recording
+            const destination = this.audioContext.createMediaStreamDestination();
+
+            // Connect Recording Chain
+            source.connect(lowcutFilter);
+            lowcutFilter.connect(highcutFilter);
+            highcutFilter.connect(compressor);
+            compressor.connect(destination);
+
+            // Save processed stream for the MediaRecorder
+            this.processedStream = destination.stream;
+
+            // --- VAD Analysis Filtering (Focus ONLY on exact Voice Band) ---
+            const vadBandpassFilter = this.audioContext.createBiquadFilter();
+            vadBandpassFilter.type = 'bandpass';
+            vadBandpassFilter.frequency.value = 1700; // Center frequency
+            vadBandpassFilter.Q.value = 1.0; // Width of the band
+
             const analyser = this.audioContext.createAnalyser();
             analyser.fftSize = 512;
             analyser.smoothingTimeConstant = 0.4; // Smooth out jitter
 
-            source.connect(bandpassFilter);
-            bandpassFilter.connect(analyser); // Analyze the FILTERED audio
+            // Connect VAD Chain
+            source.connect(vadBandpassFilter);
+            vadBandpassFilter.connect(analyser); // Analyze the FILTERED audio
 
             this.analyser = analyser;
 
@@ -112,7 +143,10 @@ class AudioService {
         this.audioChunks = [];
         this.isRecording = true;
 
-        this.mediaRecorder = new MediaRecorder(this.stream, {
+        // Use the noise-cleaned processed stream if available, otherwise fallback to raw stream
+        const recordingStream = this.processedStream || this.stream;
+
+        this.mediaRecorder = new MediaRecorder(recordingStream, {
             mimeType: 'audio/webm;codecs=opus'
         });
 
@@ -476,6 +510,12 @@ class AudioService {
 
         if (this.stream) {
             this.stream.getTracks().forEach(track => track.stop());
+            this.stream = null;
+        }
+
+        if (this.processedStream) {
+            this.processedStream.getTracks().forEach(track => track.stop());
+            this.processedStream = null;
         }
 
         // Stop Silero VAD
