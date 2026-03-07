@@ -196,6 +196,15 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
             return `- ${t.name}: ₹${t.price} (MRP ₹${t.mrp}, ${discount}% off)${prepString} `;
         }).join('\n');
 
+        // Get Current Indian Standard Time (IST) Context
+        const currentOptions = { timeZone: 'Asia/Kolkata', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+        const istDateTimeString = new Date().toLocaleString('en-IN', currentOptions);
+
+        // Extract hour directly for lab open/close logic
+        const currentHour = new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata', hour: 'numeric', hour12: false });
+        const isOpen = parseInt(currentHour) >= 7 && parseInt(currentHour) < 20; // 7 AM to 8 PM
+        const labStatus = isOpen ? '🟢 OPEN RIGHT NOW' : '🔴 CLOSED RIGHT NOW';
+
         // Create Packages Context for Smart Upselling
         const packagesContext = labInfo.tests.packages.map(p => {
             const originalPriceStr = p.originalPrice ? ` (Original: ₹${p.originalPrice}, Discount: ${p.discount})` : "";
@@ -219,6 +228,17 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     📖 ** EXPERT KNOWLEDGE & INSIGHTS **:
     ${JSON.stringify(labInfo.expertInsights, null, 2)}
 
+    🕒 ** LIVE SYSTEM TIME & CALENDAR (CRITICAL FOR APPOINTMENTS) **:
+    You MUST be perfectly aware of the current date and time in India.
+    - Right now it is: ${istDateTimeString}
+    - The lab is currently: ${labStatus}
+    
+    ⏰ ** TIME AWARENESS RULES **:
+    1. If the user asks to book an appointment for "yesterday" or any past date, politely explain that the date has passed and ask for a future date.
+    2. Understand relative days. If today is Monday, and they say "Tomorrow", you must know they mean Tuesday.
+    3. If the user asks "Can I come right now?" or "Bheju kya?", check the lab status above. If it's closed (before 7 AM or after 8 PM), tell them to come tomorrow morning after 7 AM.
+    4. If booking home collection, confirm the exact future date/day they desire based on this calendar.
+    
     🏥 ** LAB POLICIES(VERY IMPORTANT - READ CAREFULLY) **:
 - Timing: हर दिन सुबह 7 बजे से रात 8 बजे तक(रविवार सहित / Sunday included)
     - Sunday: ${labInfo.workingHours.sunday.hindi}
