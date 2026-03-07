@@ -254,6 +254,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     5. For home collection: ONLY if they asked for it, collect details step by step.
     6. Give a direct, helpful answer in 1 - 3 short lines.Sound like a friendly human on the phone("हाँ जी...", "अच्छा...", "बिलकुल").
     7. Match the customer's language (Hinglish/Gujarati mix) naturally.
+    8. CRITICAL: NEVER leave your sentence incomplete. You MUST finish your sentence with proper punctuation (like a full stop ., question mark ?, or exclamation mark !).
 
     तुम्हारा जवाब(ग्राहक की भाषा में, 1 - 3 lines, natural conversational tone, friendly receptionist): `;
 
@@ -270,7 +271,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
                 }],
                 generationConfig: {
                     temperature: 0.6,
-                    maxOutputTokens: 400,
+                    maxOutputTokens: 1024,
                     topP: 0.95,
                     topK: 40
                 },
