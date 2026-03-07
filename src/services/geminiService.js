@@ -259,6 +259,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
 3. Phone Number
 4. Address
 5. Test Name(s) / Package Name
+6. Time Slot (Tell them exact timings are not available. Ask for a 1-hour time slot like "9 to 10 AM", "1 to 2 PM", etc.)
     - Confirm booking with summary once all details are collected.
 
     🩺 ** TEST INQUIRY LOGIC(SMART) **:
