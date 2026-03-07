@@ -147,10 +147,13 @@ export const transcribeAudio = async (audioBlob, useFallback = false) => {
         const textPart = parts.filter(p => p.text !== undefined).pop();
         let transcription = textPart?.text || "";
 
-        // Filter out Gemini audio hallucination text (like timestamps "00:00 00:02")
+        // Filter out Gemini audio hallucination text (like timestamps "00:00", "No clear speech", etc.)
         transcription = transcription
             .replace(/\b\d{2}:\d{2}\b/g, '') // Remove timestamps like 00:00
             .replace(/\b\d{2}:\d{2}:\d{2}\b/g, '') // Remove timestamps like 00:00:00
+            .replace(/\(?No clear speech\)?/gi, '') // Remove hallucinated text "(No clear speech)"
+            .replace(/\[.*?\]/g, '') // Remove anything in brackets like [noise], [silence]
+            .replace(/[-*#]/g, '') // Remove lonely bullet points it sometimes adds
             .trim();
 
         // If the transcription is empty after filtering timestamps, throw an error
