@@ -474,8 +474,8 @@ class AudioService {
             const audio = new Audio(audioUrl);
             this.currentAudio = audio;
 
-            // Set normal playback speed (1.0) so it sounds like a natural human, not rushed.
-            audio.playbackRate = 1.0;
+            // Slightly speed up audio to sound more human-like and upbeat (1.1x)
+            audio.playbackRate = 1.1;
 
             audio.onended = () => {
                 URL.revokeObjectURL(audioUrl);
