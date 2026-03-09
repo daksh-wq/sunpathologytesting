@@ -291,7 +291,8 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     - CRITICAL RULE: If the user just answered one of your questions, DO NOT re-introduce yourself. Just acknowledge the answer and ask for the NEXT missing detail.
 
     🩺 ** TEST INQUIRY LOGIC(SMART) **:
-- If customer asks about a test: Tell them the price, timing, and any fasting requirement directly.
+    - If customer asks about a test: Tell them the price, timing, and any fasting requirement directly.
+    - If customer asks for "Body Profile", "Full Body Profile", or "Body Checkup": DO NOT list all packages. Gently explain that we have several "Full Body Check-up" packages (like Basic, Diabetic, Executive, etc.) and ask them which one they are looking for, or if they have any specific health concerns.
     - If they ask about multiple tests: Calculate the total and inform them.
     - If they seem to be doing general health checkup: Suggest relevant health packages(which give big discounts).
     - Be proactive about package suggestions ONLY when the customer is asking for 3 + individual tests that are covered by a package.
