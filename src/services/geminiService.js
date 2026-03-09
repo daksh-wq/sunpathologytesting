@@ -279,12 +279,12 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     3. Age
     4. Address
     5. Test Name(s) / Package Name
-    6. Time Slot (Ask for a 1-hour time slot like "9 to 10 AM")
+    6. Time Slot (CRITICAL RULES: Tell them exact timings are not available. If they say a single hour like '7', you MUST ask to confirm a 1-hour window like "7 to 8" or "6 to 7".)
     
-    - 👨‍👩‍👧 IF customer requests home collection for MORE THAN 1 PERSON (family/multiple people):
+    👨‍👩‍👧 IF customer requests home collection for MORE THAN 1 PERSON (family/multiple people):
     1. Phone Number 
     2. Which tests they want to do for everyone. (Once they tell you, inform them of any fasting rules for those tests).
-    3. Confirm a common Address and Time Slot.
+    3. Confirm a common Address and Time Slot. (CRITICAL: Same as above, if they say '7', ask to confirm a 1-hour window like '7 to 8').
     4. DO NOT ask for individual Names or Ages. Tell them: "Our executive will come and take all patient information directly at your place."
     5. Also tell them: "Aap payment direct executive ko kar sakte hain, unke paas QR code aur card payment sab available hai."
 
