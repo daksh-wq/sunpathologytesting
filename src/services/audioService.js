@@ -254,8 +254,15 @@ class AudioService {
         const checkAudio = () => {
             if (!this.isRecording) return;
 
-            // IGNORE all audio during safeguard period
-            if (Date.now() - recordingStartTime < safeguardDelay) {
+            // IGNORE all audio during safeguard period or when Bot is speaking (prevent self-interruption from echo)
+            if (Date.now() - recordingStartTime < safeguardDelay || this.currentAudio !== null) {
+                // If bot is speaking, reset all tracking so it doesn't instantly trigger when done
+                if (this.currentAudio !== null) {
+                    consecutiveSpeechFrames = 0;
+                    consecutiveSilenceFrames = 0;
+                    confidenceHistory = [];
+                    bargeInTriggered = false;
+                }
                 requestAnimationFrame(checkAudio);
                 return;
             }

@@ -388,6 +388,17 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
             .replace(/^Sheetal:\s*/i, '')   // Remove "Sheetal:" prefix (English)
             .replace(/^\[.*?\]\s*/g, '');   // Remove any bracketed prefixes
 
+        // Ensure the sentence ends properly (fix fragmented/cut-off endings)
+        aiResponse = aiResponse
+            .replace(/,\s*$/, '.') // Replace trailing comma with full stop
+            .replace(/\s+(and|aur|ane|vager|वगैरह|વગેરે)\s*$/i, '.') // Remove trailing conjunctions
+            .trim();
+
+        // If it doesn't end with punctuation, add a full stop to ensure TTS voice drops naturally
+        if (!/[.!?|।]$/.test(aiResponse) && aiResponse.length > 0) {
+            aiResponse += '.';
+        }
+
         return aiResponse;
     } catch (error) {
         console.error('Response error:', error);
