@@ -125,10 +125,10 @@ class AudioService {
                     console.log("🧠 Silero VAD: MISFIRE (too short / noise)");
                 },
                 // Tuning parameters
-                positiveSpeechThreshold: 0.90,  // VERY High threshold for nearby confident speech
-                negativeSpeechThreshold: 0.25,  // End speech slower (was 0.35)
-                redemptionFrames: 8,            // Longer redemption to capture pauses/breaths (was 3)
-                minSpeechFrames: 5,             // Minimum frames to constitute speech (~150ms)
+                positiveSpeechThreshold: 0.95,  // EXTREMELY High threshold for confident speech
+                negativeSpeechThreshold: 0.50,  // Drops out of speech mode very aggressively if voice lowers
+                redemptionFrames: 6,
+                minSpeechFrames: 8,             // Require longer sustained speech (prevents short distant shouts)
                 preSpeechPadFrames: 3,          // Frames to include before speech starts
             });
 
@@ -194,12 +194,12 @@ class AudioService {
         const VOICE_BIN_END = 36;   // ~3375 Hz
 
         // Dynamic Noise Floor Tracking
-        let noiseFloor = 30; // Assume a higher baseline to ignore distant weak noises even in quiet rooms
+        let noiseFloor = 50; // VERY HIGH baseline. Distant sounds won't even wake it up.
         const NOISE_LEARNING_RATE = 0.05; // Faster adaptation to steady noise
 
         // Thresholds (relative to noise floor)
-        const SPEECH_RATIO = 3.0; // Strictly require speech to be 3x louder than background (Nearby Voice)
-        const BARGE_IN_RATIO = 5.0; // Interruptions must be massively louder (Direct mic proximity)
+        const SPEECH_RATIO = 4.5; // EXTREMELY STRICT: Voice MUST be 4.5x louder than background (Forces phone to ear/mouth)
+        const BARGE_IN_RATIO = 7.0; // Interruptions must be shouting into the mic
 
         // Temporal Smoothing
         let consecutiveSpeechFrames = 0;
@@ -329,8 +329,8 @@ class AudioService {
             if (averageVoiceEnergy < noiseFloor * 1.5) {
                 noiseFloor = (noiseFloor * (1 - NOISE_LEARNING_RATE)) + (averageVoiceEnergy * NOISE_LEARNING_RATE);
             }
-            // Increase absolute minimum noise floor to 15 to reject 'pin-drop' background sounds
-            noiseFloor = Math.max(15, Math.min(noiseFloor, 60));
+            // Increase absolute minimum noise floor to 35 to reject ANY distant chatters in the room
+            noiseFloor = Math.max(35, Math.min(noiseFloor, 70));
 
             // --- 2F: Energy Score ---
             const currentSpeechThreshold = noiseFloor * SPEECH_RATIO;
@@ -365,11 +365,11 @@ class AudioService {
             const avgConfidence = confidenceHistory.reduce((a, b) => a + b, 0) / confidenceHistory.length;
 
             // --- State Machine ---
-            // Must beat the relative threshold AND an absolute raw minimum energy (e.g., 40 out of 255)
-            // Distant voices typically log very low absolute energy (<25) even if the room is quiet.
-            const isLoud = averageVoiceEnergy > currentSpeechThreshold && averageVoiceEnergy > 45;
+            // Must beat the relative threshold AND an absolute raw minimum energy (e.g., 75 out of 255)
+            // Distant voices typically log very low absolute energy (<40) even if the room is quiet.
+            const isLoud = averageVoiceEnergy > currentSpeechThreshold && averageVoiceEnergy > 75;
 
-            if (isLoud && energyScore > 0.3) {
+            if (isLoud && energyScore > 0.45) {
                 consecutiveSilenceFrames = 0;
                 consecutiveSpeechFrames++;
 
