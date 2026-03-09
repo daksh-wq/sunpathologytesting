@@ -25,7 +25,16 @@ class AudioService {
                 audio: {
                     echoCancellation: true,
                     noiseSuppression: true,
-                    autoGainControl: true
+                    autoGainControl: true,
+                    channelCount: 1,
+                    googEchoCancellation: true,
+                    googExperimentalEchoCancellation: true,
+                    googAutoGainControl: true,
+                    googExperimentalAutoGainControl: true,
+                    googNoiseSuppression: true,
+                    googExperimentalNoiseSuppression: true,
+                    googHighpassFilter: true,
+                    googTypingNoiseDetection: true
                 }
             });
 
