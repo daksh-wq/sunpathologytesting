@@ -23,9 +23,9 @@ const fetchWithRetry = async (url, options, maxRetries = 3) => {
     return fetch(url, options);
 };
 
-// System prompt - Raj the receptionist (Natural Hinglish + Gujarati, casually professional)
-const SYSTEM_PROMPT = `तुम 'राज' हो - सन पैथोलॉजी लैब के AI receptionist (friendly virtual assistant) जो बिल्कुल इंसान की तरह बात करते हो। 5 साल से यहाँ काम कर रहे हो।
-તમે 'રાજ' છો - સન પેથોલોજી લેબના AI receptionist. 5 વર્ષથી અહીં કામ કરો છો.
+// System prompt - Sheetal the receptionist (Natural Hinglish + Gujarati, casually professional)
+const SYSTEM_PROMPT = `तुम 'शीतल' हो - सन पैथोलॉजी लैब की AI receptionist (friendly virtual assistant) जो बिल्कुल इंसान की तरह बात करती हो। 5 साल से यहाँ काम कर रही हो।
+તમે 'શીતલ' છો - સન પેથોલોજી લેબના AI receptionist. 5 વર્ષથી અહીં કામ કરો છો.
 
 🎭 **PERSONALITY (बहुत IMPORTANT - इसी तरह बात करनी है)**:
 तुम एक AI हो लेकिन एक REAL HUMAN receptionist की तरह बात करते हो। 
@@ -34,11 +34,11 @@ const SYSTEM_PROMPT = `तुम 'राज' हो - सन पैथोलॉ�
 - You MUST always finish your sentences properly and fully. DO NOT leave broken, incomplete, or half sentences under any circumstances. Even if short, it must be a complete grammatical expression.
 
 🗣️ **SPEAKING RULES**:
-1. **Hinglish is NATURAL**: Mix Hindi + English words naturally, like real Indians talk.
+1. **Hinglish is NATURAL**: Mix Hindi + English words naturally, like real Indians talk. ALWAYS use the full word 'rupees' instead of 'rs' or '₹' when speaking about money.
 2. **SHORT BUT COMPLETE**: Phone pe लोग लम्बे paragraphs नहीं सुनते। 1-3 lines max. But ensure sentences NEVER cut off mid-way. Start and end clearly.
 3. **NATURAL FILLERS (use these!)**: "हाँ जी...", "अच्छा...", "एक second...", "हाँ हाँ बिल्कुल..."
 4. **WARM & PROFESSIONAL**: 
-   - If asked if you are a human/bot, respond transparently: "मैं राज हूँ, सन पैथोलॉजी का AI असिस्टेंट, पर मैं आपकी पूरी मदद करूँगा।"
+   - If asked if you are a human/bot, respond transparently: "मैं शीतल हूँ, सन पैथोलॉजी की AI असिस्टेंट, पर मैं आपकी पूरी मदद करूँगी।"
    - Be helpful and confident, like you know everything about the lab.
 
 🌐 **LANGUAGE MATCHING (CRITICAL)**:
@@ -178,7 +178,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
         // Gemini 2.0 Flash has a large context window, so we can pass more history.
         const historyText = conversationHistory
             .slice(-50) // Increased from 20 to 50 to remember early details
-            .map(msg => `${msg.role === 'ai' ? 'Raj (You)' : 'Customer'}: ${msg.text} `)
+            .map(msg => `${msg.role === 'ai' ? 'Sheetal (You)' : 'Customer'}: ${msg.text} `)
             .join('\n');
 
         // Get previous AI responses to avoid repetition
@@ -196,7 +196,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
             const prep = getTestPreparation(t.name);
             const prepString = prep ? ` [Note: ${prep}]` : "";
             const discount = t.mrp - t.price < 0 ? 0 : Math.round(((t.mrp - t.price) / t.mrp) * 100);
-            return `- ${t.name}: ₹${t.price} (MRP ₹${t.mrp}, ${discount}% off)${prepString} `;
+            return `- ${t.name}: ${t.price} rupees (MRP ${t.mrp} rupees, ${discount}% off)${prepString} `;
         }).join('\n');
 
         // Get Current Indian Standard Time (IST) Context
@@ -210,8 +210,8 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
 
         // Create Packages Context for Smart Upselling
         const packagesContext = labInfo.tests.packages.map(p => {
-            const originalPriceStr = p.originalPrice ? ` (Original: ₹${p.originalPrice}, Discount: ${p.discount})` : "";
-            return `- ${p.name}: ₹${p.price}${originalPriceStr} | Tests Included: ${p.includes}`;
+            const originalPriceStr = p.originalPrice ? ` (Original: ${p.originalPrice} rupees, Discount: ${p.discount})` : "";
+            return `- ${p.name}: ${p.price} rupees${originalPriceStr} | Tests Included: ${p.includes}`;
         }).join('\n');
 
         // Create Branches Context for Location Guided Routing
@@ -263,12 +263,13 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
 - लैब में आने के लिए कोई बुकिंग या अपॉइंटमेंट की ज़रूरत नहीं है।
 - NO BOOKING, NO APPOINTMENT, NO PRIOR REGISTRATION needed for walk -in.
     - Simply tell the customer: "आप सीधे लैब में आ सकते हैं, कोई बुकिंग की ज़रूरत नहीं है।"
-    - If a customer says they want to come to the lab or get a test done, ASSUME WALK - IN. Just tell them the timing, price, and if they need directions, route them using the Location Intelligence above.
+    - If a customer says they want to get a test done ("test karvana hai"), ALWAYS ASSUME WALK - IN. Just tell them the timing and price.
+    - 🚫 NEVER suggest or ask if they want home collection. NEVER say "Aapko lab aana hai ya ghar se karwana hai?". Wait for them to explicitly ask for it.
     - DO NOT ask for name, phone number, age, or address for walk - ins. They just come in.
 
     🏠 ** HOME COLLECTION BOOKING FLOW (STRICT STEP-BY-STEP) **:
-- 🚫 NEVER mention or suggest home collection proactively. Only discuss it IF the customer explicitly asks.
-    - Home Collection Charge: ₹50 extra for individual tests. FREE for any health package.
+- 🚫 NEVER mention or suggest home collection proactively. ONLY offer home collection if the customer EXPLICITLY says "mujhe ghar se test karwana hai" or "home test".
+    - Home Collection Charge: 50 rupees extra for individual tests. FREE for any health package.
     - IF customer requests home collection, you are now in a BOOKING STATE. Collect these missing details ONE BY ONE:
 1. Patient Name
 2. Age
@@ -368,9 +369,9 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
             .replace(/\*+/g, '')
             .replace(/#+/g, '')
             .replace(/^["']|["']$/g, '')
-            .replace(/^રાજ:\s*/i, '')  // Remove "Raj:" prefix (Gujarati)
-            .replace(/^राज:\s*/i, '')   // Remove "Raj:" prefix (Hindi)
-            .replace(/^Raj:\s*/i, '')   // Remove "Raj:" prefix (English)
+            .replace(/^શીતલ:\s*/i, '')  // Remove "Sheetal:" prefix (Gujarati)
+            .replace(/^शीतल:\s*/i, '')   // Remove "Sheetal:" prefix (Hindi)
+            .replace(/^Sheetal:\s*/i, '')   // Remove "Sheetal:" prefix (English)
             .replace(/^\[.*?\]\s*/g, '');   // Remove any bracketed prefixes
 
         return aiResponse;

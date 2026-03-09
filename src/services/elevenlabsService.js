@@ -12,7 +12,7 @@ const VOICE_ID_AISHA = "mg9npuuaf8WJphS6E0Rt"; // Aisha - Friendly, empathetic
 // Raju - Clear and warm, good for storytelling
 const VOICE_ID_RAJU = "ErXwobaYiN019PkySvjV"; // Raju - Clear, natural, warm
 
-// Default voice - Raj (Using Aisha - Female/Empathetic voice ID)
+// Default voice - Sheetal (Using Aisha - Female/Empathetic voice ID)
 const DEFAULT_VOICE_ID = "mg9npuuaf8WJphS6E0Rt"; // Aisha - Friendly, empathetic
 
 // Detect if text is primarily Gujarati
