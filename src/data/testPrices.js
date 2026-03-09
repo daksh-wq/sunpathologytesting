@@ -333,14 +333,14 @@ export const findTestPrice = (query) => {
 export const getTestPreparation = (testName) => {
     const lower = testName.toLowerCase();
 
-    if (lower.includes("fasting") || lower.includes("fbs") || lower.includes("f.b.s")) {
-        return "Empty stomach required (8-10 hours fasting). Pani pe skte hain.";
+    if (lower.includes("fasting") || lower.includes("fbs") || lower.includes("f.b.s") || lower.includes("homocysteine")) {
+        return "Strictly 10-12 hours fasting required. ONLY water is allowed. Do NOT fast for more than 12 hours as overfasting affects the report negatively.";
     }
-    if (lower.includes("ppbs") || lower.includes("post lunch") || lower.includes("post prandial")) {
-        return "Khane ke 2 ghante baad sample dena hai.";
+    if (lower.includes("ppbs") || lower.includes("post lunch") || lower.includes("post prandial") || lower.includes("post-dinner") || lower.includes("post dinner")) {
+        return "Khane ke theek 2 ghante baad sample dena hai.";
     }
     if (lower.includes("lipid") || lower.includes("cholesterol") || lower.includes("triglycerides")) {
-        return "10-12 hours fasting required. Heavy dinner avoid karein.";
+        return "Strictly 10-12 hours fasting required. Heavy dinner avoid karein. IMPORTANT: 12 ghante se zyaada fasting (overfasting) is bad for this test.";
     }
     if (lower.includes("thyroid") || lower.includes("tsh") || lower.includes("t3") || lower.includes("t4")) {
         return "Morning sample preferred.";
