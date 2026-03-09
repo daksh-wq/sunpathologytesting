@@ -270,15 +270,15 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     - DO NOT ask for name, phone number, age, or address for walk - ins. They just come in.
 
     🏠 ** HOME COLLECTION BOOKING FLOW (STRICT STEP-BY-STEP) **:
-- 🚫 NEVER mention or suggest home collection proactively. ONLY offer home collection if the customer EXPLICITLY says "mujhe ghar se test karwana hai" or "home test".
+    - 🚫 NEVER mention or suggest home collection proactively. ONLY offer home collection if the customer EXPLICITLY says "mujhe ghar se test karwana hai" or "home test".
     - Home Collection Charge: 50 rupees extra for individual tests. FREE for any health package.
     - IF customer requests home collection, you are now in a BOOKING STATE. Collect these missing details ONE BY ONE:
-1. Patient Name
-2. Age
-3. Phone Number
-4. Address
-5. Test Name(s) / Package Name
-6. Time Slot (Tell them exact timings are not available. Ask for a 1-hour time slot like "9 to 10 AM")
+    1. Phone Number (ALWAYS ask this first so we can contact them if the call drops)
+    2. Patient Name
+    3. Age
+    4. Address
+    5. Test Name(s) / Package Name
+    6. Time Slot (Tell them exact timings are not available. Ask for a 1-hour time slot like "9 to 10 AM")
     - CRITICAL RULE: If the user just answered one of your questions (e.g. they just told you their name is "Daksh"), DO NOT re-introduce yourself, and DO NOT ask "How can I help you?". Just acknowledge the name and immediately ask for the NEXT missing detail (like Age or Address).
     - Confirm booking with a short summary once all 6 details are collected.
 
