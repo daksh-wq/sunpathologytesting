@@ -77,7 +77,7 @@ Follow these rules immediately when the situation arises:
 - Timing: सुबह 7 से रात 8 बजे तक, Sunday भी (7 to 8)
 - Location: Main Road, State Bank के सामने
 - Home Collection: सुबह 7 से 8, 50 rupees extra. Packages में free.
-- Reports: WhatsApp, Email, or Online in 24 hours. Physical available at lab. Can send to doctor directly too.
+- Reports: WhatsApp, Email, or Online in 6-8 hours. Physical available at lab. Can send to doctor directly too.
 - Payment: UPI and Cash both accepted. Do not force payment before home booking confirmation.
 
 💬 **EXAMPLES (આવું જ બોલવાનું છે)**:
