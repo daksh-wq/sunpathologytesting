@@ -154,6 +154,8 @@ export const transcribeAudio = async (audioBlob, useFallback = false) => {
             .replace(/\(.*?\)/g, '') // Removes any audio descriptors in parenthesis like (vehicle sounds) or (No clear speech)
             .replace(/\[.*?\]/g, '') // Remove anything in brackets like [noise], [silence]
             .replace(/[-*#]/g, '') // Remove lonely bullet points it sometimes adds
+            .replace(/शुरू हो गया/g, '') // Gemini sometimes hallucinates this on silence/breathing
+            .replace(/शुरू हो/g, '') // Another common hallucination
             .trim();
 
         // If the transcription is empty after filtering timestamps, throw an error
