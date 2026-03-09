@@ -117,8 +117,8 @@ class AudioService {
                 },
                 // Tuning parameters
                 positiveSpeechThreshold: 0.90,  // VERY High threshold for nearby confident speech
-                negativeSpeechThreshold: 0.35,  // End speech faster if signal gets weak
-                redemptionFrames: 3,            // Shorter redemption to cut off distant noise trails
+                negativeSpeechThreshold: 0.25,  // End speech slower (was 0.35)
+                redemptionFrames: 8,            // Longer redemption to capture pauses/breaths (was 3)
                 minSpeechFrames: 5,             // Minimum frames to constitute speech (~150ms)
                 preSpeechPadFrames: 3,          // Frames to include before speech starts
             });
@@ -134,8 +134,8 @@ class AudioService {
         }
     }
 
-    // Start recording audio
-    startRecording(onSilenceDetected, silenceThreshold = 1500, onSpeechStart = null, safeguardDelay = 1000) {
+    // Start recording audio - INCREASED DEFAULT SILENCE THRESHOLD from 1500 to 2500
+    startRecording(onSilenceDetected, silenceThreshold = 2500, onSpeechStart = null, safeguardDelay = 1000) {
         if (!this.stream) {
             throw new Error('Audio not initialized');
         }
@@ -196,7 +196,7 @@ class AudioService {
         let consecutiveSpeechFrames = 0;
         let consecutiveSilenceFrames = 0;
         const SPEECH_START_FRAMES = 5;  // ~100ms sustained sound to start speech
-        const SPEECH_END_FRAMES = 15;   // ~300ms silence to end speech segment
+        const SPEECH_END_FRAMES = 25;   // ~500ms silence to end speech segment (was 15)
 
         // --- PRODUCTION: Instant Barge-In ---
         // 7 Frames * ~20ms = ~140ms of CONTINUOUS speech required.
