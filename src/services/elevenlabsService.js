@@ -24,10 +24,34 @@ const isGujarati = (text) => {
     return gujaratiMatches.length > text.length * 0.15;
 };
 
+// Convert numbers to English words to prevent TTS engines from mispronouncing digits in mixed-language text
+const numberToWords = (num) => {
+    const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+        'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen',
+        'seventeen', 'eighteen', 'nineteen'];
+    const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+    if (num === 0) return 'zero';
+    if (num < 20) return ones[num];
+    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
+    if (num < 1000) return ones[Math.floor(num / 100)] + ' hundred' + (num % 100 !== 0 ? ' ' + numberToWords(num % 100) : '');
+    if (num < 100000) return numberToWords(Math.floor(num / 1000)) + ' thousand' + (num % 1000 !== 0 ? ' ' + numberToWords(num % 1000) : '');
+    return num.toString(); // Fallback for very large numbers
+};
+
+const preprocessTextForTTS = (text) => {
+    // Replace all isolated numbers with their word equivalents
+    return text.replace(/\b\d+\b/g, (match) => {
+        const num = parseInt(match, 10);
+        return numberToWords(num);
+    });
+};
+
 // Convert text to speech using ElevenLabs with language optimization
 export const synthesizeSpeech = async (text, voiceId = DEFAULT_VOICE_ID) => {
     try {
-        const isGujaratiText = isGujarati(text);
+        const processedText = preprocessTextForTTS(text);
+        const isGujaratiText = isGujarati(processedText);
 
         // Use 'eleven_v3' (Alpha) for proper Gujarati support
         // Falling back to 'eleven_flash_v2_5' for other languages
@@ -61,7 +85,7 @@ export const synthesizeSpeech = async (text, voiceId = DEFAULT_VOICE_ID) => {
                 'xi-api-key': API_KEY
             },
             body: JSON.stringify({
-                text: text,
+                text: processedText,
                 model_id: modelId,
                 voice_settings: voiceSettings
             })
@@ -74,7 +98,7 @@ export const synthesizeSpeech = async (text, voiceId = DEFAULT_VOICE_ID) => {
             // Fallback to multilingual v2 if flash model fails
             if (modelId === "eleven_flash_v2_5") {
                 console.log('Retrying with eleven_multilingual_v2...');
-                return synthesizeSpeechFallback(text, voiceId, voiceSettings);
+                return synthesizeSpeechFallback(processedText, voiceId, voiceSettings);
             }
             throw new Error(`ElevenLabs API error: ${response.status}`);
         }
