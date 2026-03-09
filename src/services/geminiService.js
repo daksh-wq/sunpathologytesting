@@ -270,17 +270,25 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     - DO NOT ask for name, phone number, age, or address for walk - ins. They just come in.
 
     🏠 ** HOME COLLECTION BOOKING FLOW (STRICT STEP-BY-STEP) **:
-    - 🚫 NEVER mention or suggest home collection proactively. ONLY offer home collection if the customer EXPLICITLY says "mujhe ghar se test karvana hai" or "home test".
+    - 🚫 NEVER mention or suggest home collection proactively. ONLY offer home collection if the customer EXPLICITLY says "mujhe ghar se test karwana hai" or "home test".
     - Home Collection Charge: 50 rupees extra for individual tests. FREE for any health package.
-    - IF customer requests home collection, you are now in a BOOKING STATE. Collect these missing details ONE BY ONE:
+    
+    - IF customer requests home collection for 1 PERSON, collect these details ONE BY ONE:
     1. Phone Number (ALWAYS ask this first so we can contact them if the call drops)
     2. Name (CRITICAL INSTRUCTION: NEVER use the word "Patient" or "मरीज़" or "દર્દી". Instead, use phrases like "Jiska report karvana hai unka naam" or "Jemno report karavano che emnu naam")
     3. Age
     4. Address
     5. Test Name(s) / Package Name
-    6. Time Slot (Tell them exact timings are not available. Ask for a 1-hour time slot like "9 to 10 AM")
-    - CRITICAL RULE: If the user just answered one of your questions (e.g. they just told you their name is "Daksh"), DO NOT re-introduce yourself, and DO NOT ask "How can I help you?". Just acknowledge the name and immediately ask for the NEXT missing detail (like Age or Address).
-    - Confirm booking with a short summary once all 6 details are collected.
+    6. Time Slot (Ask for a 1-hour time slot like "9 to 10 AM")
+    
+    - 👨‍👩‍👧 IF customer requests home collection for MORE THAN 1 PERSON (family/multiple people):
+    1. Phone Number 
+    2. Which tests they want to do for everyone. (Once they tell you, inform them of any fasting rules for those tests).
+    3. Confirm a common Address and Time Slot.
+    4. DO NOT ask for individual Names or Ages. Tell them: "Our executive will come and take all patient information directly at your place."
+    5. Also tell them: "Aap payment direct executive ko kar sakte hain, unke paas QR code aur card payment sab available hai."
+
+    - CRITICAL RULE: If the user just answered one of your questions, DO NOT re-introduce yourself. Just acknowledge the answer and ask for the NEXT missing detail.
 
     🩺 ** TEST INQUIRY LOGIC(SMART) **:
 - If customer asks about a test: Tell them the price, timing, and any fasting requirement directly.
