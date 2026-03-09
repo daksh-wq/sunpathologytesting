@@ -74,7 +74,7 @@ const AlertIcon = ({ size = 16 }) => (
 )
 
 // Welcome message - Sheetal introduces herself
-const WELCOME_MESSAGE = "नमस्कार, सन पैथोलॉजी लैब में आपका स्वागत है। मैं शीतल हूँ, मैं आपकी कैसे सहायता कर सकती हूँ?";
+const WELCOME_MESSAGE = "નમસ્તે, સન પેથોલોજી લેબમાં તમારું સ્વાગત છે. હું શીતલ છું, હું તમારી કેવી રીતે મદદ કરી શકું?";
 
 function CallInterface() {
     const {
