@@ -211,6 +211,7 @@ class AudioService {
         const timeDomainData = new Uint8Array(bufferLength);
         let silenceStart = null;
         let isSpeaking = false;
+        let bargeInTriggered = false; // Track if barge-in has fired for this segment
 
         // Safety: Ignore audio for the first 'safeguardDelay' ms (prevent self-echo)
         const recordingStartTime = Date.now();
@@ -272,6 +273,7 @@ class AudioService {
                 // Silero says no speech — reset counters
                 consecutiveSpeechFrames = 0;
                 confidenceHistory = [];
+                bargeInTriggered = false;
 
                 if (isSpeaking) {
                     consecutiveSilenceFrames++;
@@ -421,39 +423,39 @@ class AudioService {
                 if (!isSpeaking && consecutiveSpeechFrames >= SPEECH_START_FRAMES) {
                     // Valid Speech Started
                     isSpeaking = true;
-
-                    if (onSpeechStart) {
-                        // --- PRODUCTION BARGE-IN DECISION ---
-                        // Must have BOTH sustained duration AND high confidence
-                        const bargeInConfidenceThreshold = consecutiveSpeechFrames < 10 ? 0.80 : 0.65;
-
-                        if (consecutiveSpeechFrames >= BARGE_IN_FRAMES && avgConfidence >= bargeInConfidenceThreshold) {
-                            console.log(
-                                `✅ INSTANT BARGE-IN ACCEPTED | Confidence: ${(avgConfidence * 100).toFixed(1)}% | ` +
-                                `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} (${zcrScore.toFixed(2)}) | ` +
-                                `Flux: ${spectralFlux.toFixed(1)} (${fluxScore.toFixed(2)}) | ` +
-                                `Frames: ${consecutiveSpeechFrames} | Silero: ${this.sileroReady ? (this.sileroSpeaking ? 'SPEECH' : 'SILENT') : 'N/A'}`
-                            );
-                            onSpeechStart();
-                        } else if (consecutiveSpeechFrames >= BARGE_IN_FRAMES && avgConfidence < bargeInConfidenceThreshold) {
-                            // Had enough frames but confidence too low — likely noise
-                            console.log(
-                                `🚫 REJECTED (Low Confidence) | Confidence: ${(avgConfidence * 100).toFixed(1)}% ` +
-                                `(need ${(bargeInConfidenceThreshold * 100).toFixed(0)}%) | ` +
-                                `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} | Flux: ${spectralFlux.toFixed(1)}`
-                            );
-                        }
-                    }
                     silenceStart = null;
                     if (this.silenceTimeout) {
                         clearTimeout(this.silenceTimeout);
                         this.silenceTimeout = null;
                     }
                 }
+
+                // Evaluate Barge-In trigger while speaking
+                if (isSpeaking && onSpeechStart && !bargeInTriggered) {
+                    const bargeInConfidenceThreshold = consecutiveSpeechFrames < 10 ? 0.80 : 0.65;
+
+                    if (consecutiveSpeechFrames >= BARGE_IN_FRAMES && avgConfidence >= bargeInConfidenceThreshold) {
+                        console.log(
+                            `✅ INSTANT BARGE-IN ACCEPTED | Confidence: ${(avgConfidence * 100).toFixed(1)}% | ` +
+                            `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} (${zcrScore.toFixed(2)}) | ` +
+                            `Flux: ${spectralFlux.toFixed(1)} (${fluxScore.toFixed(2)}) | ` +
+                            `Frames: ${consecutiveSpeechFrames} | Silero: ${this.sileroReady ? (this.sileroSpeaking ? 'SPEECH' : 'SILENT') : 'N/A'}`
+                        );
+                        bargeInTriggered = true;
+                        onSpeechStart();
+                    } else if (consecutiveSpeechFrames === BARGE_IN_FRAMES && avgConfidence < bargeInConfidenceThreshold) {
+                        console.log(
+                            `🚫 REJECTED (Low Confidence) | Confidence: ${(avgConfidence * 100).toFixed(1)}% ` +
+                            `(need ${(bargeInConfidenceThreshold * 100).toFixed(0)}%) | ` +
+                            `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} | Flux: ${spectralFlux.toFixed(1)}`
+                        );
+                    }
+                }
             } else {
                 // Quiet
                 consecutiveSpeechFrames = 0;
                 confidenceHistory = [];
+                bargeInTriggered = false;
 
                 if (isSpeaking) {
                     consecutiveSilenceFrames++;
@@ -509,8 +511,10 @@ class AudioService {
             console.log("🛑 Stopping Playback (Barge-in)");
             this.currentAudio.pause();
             this.currentAudio.currentTime = 0;
-            // dispatch ended event to resolve the promise in playAudio
-            this.currentAudio.dispatchEvent(new Event('ended'));
+            if (this.playAudioResolve) {
+                this.playAudioResolve(); // explicitly resolve promise
+                this.playAudioResolve = null;
+            }
             this.currentAudio = null;
         }
     }
@@ -527,6 +531,7 @@ class AudioService {
             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             this.currentAudio = audio;
+            this.playAudioResolve = resolve;
 
             // Slightly speed up audio to sound more human-like and upbeat (1.1x)
             audio.playbackRate = 1.1;
@@ -534,12 +539,16 @@ class AudioService {
             audio.onended = () => {
                 URL.revokeObjectURL(audioUrl);
                 this.currentAudio = null;
-                resolve();
+                if (this.playAudioResolve) {
+                    this.playAudioResolve();
+                    this.playAudioResolve = null;
+                }
             };
 
             audio.onerror = (error) => {
                 URL.revokeObjectURL(audioUrl);
                 this.currentAudio = null;
+                this.playAudioResolve = null;
                 reject(error);
             };
 
