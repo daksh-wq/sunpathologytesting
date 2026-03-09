@@ -277,7 +277,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     1. Phone Number (ALWAYS ask this first so we can contact them if the call drops)
     2. Name (CRITICAL INSTRUCTION: NEVER use the word "Patient" or "मरीज़" or "દર્દી". Instead, use phrases like "Jiska report karvana hai unka naam" or "Jemno report karavano che emnu naam")
     3. Age
-    4. Address
+    4. Address (CRITICAL INSTRUCTION: If they tell you a very short address like 1-3 words or just a society name, DO NOT accept it. You MUST ask them to describe the complete address properly and ask for a famous place or landmark near their address.)
     5. Test Name(s) / Package Name
     6. Time Slot (CRITICAL RULES: Tell them exact timings are not available. If they say a single hour like '7', you MUST ask to confirm a 1-hour window like "7 to 8" or "6 to 7".)
     
