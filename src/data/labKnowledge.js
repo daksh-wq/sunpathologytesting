@@ -101,8 +101,8 @@ export const labInfo = {
             { name: "हार्ट पैकेज", price: "1499", time: "24 घंटे", includes: "Lipid Profile, ECG, CBC" },
 
             // Comprehensive Specialty Packages (with discounts)
-            { name: "Allergy Profile", price: "3000", originalPrice: "7000", discount: "57%", time: "2-3 days", includes: "Food Allergy, Inhalant Allergy, Drug Allergy, Contact Allergy" },
-            { name: "Food Intolerance Testing", price: "6500", originalPrice: "10000", discount: "35%", time: "2-3 days", includes: "Bloating Diarrhea or IBS, Headache or Migraine, Chronic Fatigue, Depression or Anxiety, Skin Problems, Weight Control, Arthritis" },
+            { name: "Allergy Profile", price: "3000", originalPrice: "7000", discount: "57%", time: "12-48 Hours (Max)", includes: "Food Allergy, Inhalant Allergy, Drug Allergy, Contact Allergy" },
+            { name: "Food Intolerance Testing", price: "6500", originalPrice: "10000", discount: "35%", time: "12-48 Hours (Max)", includes: "Bloating Diarrhea or IBS, Headache or Migraine, Chronic Fatigue, Depression or Anxiety, Skin Problems, Weight Control, Arthritis" },
             { name: "Alcohol Impact Profile", price: "600", originalPrice: "3550", discount: "85%", time: "24 hours", includes: "CBC, Urine RM, RBS, SGPT, SGOT, Creatinine, Alkaline Phosphate, GGT, Total Bilirubin" },
             { name: "Immunization Package For Abroad Students", price: "6100", originalPrice: "8800", discount: "30%", time: "2-3 days", includes: "Mantoux (MT), TB Gold, HBsAg by CLIA, Anti HBs, Mumps Antibody Titre (IgG), Measles Antibody Titre (IgG), Rubela Antibody Titre (IgG), Varicella Zoster Antibody Titre (IgG & IgM)" },
             { name: "Hypertension Health Package (Basic)", price: "3150", originalPrice: "6900", discount: "54%", time: "24 hours", includes: "CBC, Bl.Urea, Creatinine, Sodium, Potassium, Lipid Profile, Homocysteine, HS CRP, HbA1c, Urinary Alb./Cre. Ratio, TSH, Vitamin B12, Cortisol am, Cortisol pm" },
