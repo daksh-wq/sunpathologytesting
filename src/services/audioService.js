@@ -64,17 +64,37 @@ class AudioService {
             compressor.attack.value = 0.05;
             compressor.release.value = 0.25;
 
-            // 2D. Final Output Node for Recording
-            const destination = this.audioContext.createMediaStreamDestination();
+            // 2E. Hard Noise Gate (Custom AudioWorklet)
+            // Completely mutes audio below a certain threshold to prevent Gemini from transcribing background TV/Chatter
+            try {
+                await this.audioContext.audioWorklet.addModule('/noiseGateProcessor.js');
+                const noiseGate = new AudioWorkletNode(this.audioContext, 'noise-gate-processor');
 
-            // Connect Recording Chain
-            source.connect(lowcutFilter);
-            lowcutFilter.connect(highcutFilter);
-            highcutFilter.connect(compressor);
-            compressor.connect(destination);
+                // 2D. Final Output Node for Recording
+                const destination = this.audioContext.createMediaStreamDestination();
 
-            // Save processed stream for the MediaRecorder
-            this.processedStream = destination.stream;
+                // Connect Recording Chain with Noise Gate
+                source.connect(lowcutFilter);
+                lowcutFilter.connect(highcutFilter);
+                highcutFilter.connect(compressor);
+                compressor.connect(noiseGate);
+                noiseGate.connect(destination);
+
+                // Save processed stream for the MediaRecorder
+                this.processedStream = destination.stream;
+            } catch (e) {
+                console.warn("Could not load Noise Gate Worklet, falling back to standard compressor", e);
+                // 2D. Final Output Node for Recording
+                const destination = this.audioContext.createMediaStreamDestination();
+
+                // Connect Recording Chain (Fallback without Noise Gate)
+                source.connect(lowcutFilter);
+                lowcutFilter.connect(highcutFilter);
+                highcutFilter.connect(compressor);
+                compressor.connect(destination);
+
+                this.processedStream = destination.stream;
+            }
 
             // --- VAD Analysis Filtering (Focus ONLY on exact Voice Band) ---
             const vadBandpassFilter = this.audioContext.createBiquadFilter();
