@@ -233,7 +233,7 @@ function CallInterface() {
                 // Silence detected - process the speech
                 await processUserSpeech();
             },
-            600, // Silence threshold
+            400, // Silence threshold
             handleSpeechStart, // On Speech Start (Barge-in trigger)
             150  // Safeguard delay (150ms to allow instant barge-in without missing their voice)
         );
@@ -267,27 +267,8 @@ function CallInterface() {
                 return;
             }
 
-            // --- SEMANTIC BARGE-IN FILTER ---
-            // STRICT RULE: Single-word utterances are ALWAYS rejected.
-            // Two-word utterances are rejected if they match the ignored phrases list.
-            const cleanText = userText.toLowerCase().trim().replace(/[.,!?-]/g, "");
-            const words = cleanText.split(/\s+/).filter(w => w.length > 0);
-
-            // STRICT: Reject ALL single-word transcriptions — no exceptions
-            if (words.length <= 1) {
-                console.log(`🚫 Single-word REJECTED (strict ban): "${userText}"`);
-                startListening();
-                return;
-            }
-
-            // Also reject 2-word phrases that are filler/acknowledgment
-            const isIgnored = (words.length === 2 && words.every(w => IGNORED_PHRASES.includes(w)));
-
-            if (isIgnored) {
-                console.log(`🚫 Filler phrase ignored: "${userText}"`);
-                startListening();
-                return;
-            }
+            // Removed excessively strict single-word and affirmative bans
+            // because they caused the AI to ignore valid user affirmatives like "yes", "ok", or "haan".
 
             // IMPORTANT: Build context BEFORE awaiting addMessage to guarantee no duplicate loops
             const currentContext = [...latestTranscriptRef.current, { role: 'user', text: userText }];

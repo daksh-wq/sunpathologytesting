@@ -169,6 +169,14 @@ class AudioService {
             throw new Error('Audio not initialized');
         }
 
+        if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+            try { this.mediaRecorder.stop(); } catch (e) { }
+        }
+        if (this.silenceTimeout) {
+            clearTimeout(this.silenceTimeout);
+            this.silenceTimeout = null;
+        }
+
         this.audioChunks = [];
         this.isRecording = true;
 
@@ -214,18 +222,18 @@ class AudioService {
         const VOICE_BIN_END = 36;   // ~3375 Hz
 
         // Dynamic Noise Floor Tracking
-        let noiseFloor = 50; // VERY HIGH baseline. Distant sounds won't even wake it up.
+        let noiseFloor = 25; // Sensible baseline. Distant sounds won't easily wake it up.
         const NOISE_LEARNING_RATE = 0.05; // Faster adaptation to steady noise
 
         // Thresholds (relative to noise floor)
-        const SPEECH_RATIO = 4.5; // EXTREMELY STRICT: Voice MUST be 4.5x louder than background (Forces phone to ear/mouth)
-        const BARGE_IN_RATIO = 7.0; // Interruptions must be shouting into the mic
+        const SPEECH_RATIO = 2.5; // Voice must be 2.5x louder than background
+        const BARGE_IN_RATIO = 4.0; // Interruptions must be noticeably loud
 
         // Temporal Smoothing
         let consecutiveSpeechFrames = 0;
         let consecutiveSilenceFrames = 0;
         const SPEECH_START_FRAMES = 5;  // ~100ms sustained sound to start speech
-        const SPEECH_END_FRAMES = 25;   // ~500ms silence to end speech segment (was 15)
+        const SPEECH_END_FRAMES = 15;   // ~300ms silence to end speech segment (was 25)
 
         // --- PRODUCTION: Instant Barge-In ---
         // 7 Frames * ~20ms = ~140ms of CONTINUOUS speech required.
@@ -261,9 +269,26 @@ class AudioService {
             // This catches ~99% of false triggers from background noise.
             // ============================================================
             if (this.sileroReady && !this.sileroSpeaking) {
-                // Silero says no speech — reset counters and skip
+                // Silero says no speech — reset counters
                 consecutiveSpeechFrames = 0;
                 confidenceHistory = [];
+
+                if (isSpeaking) {
+                    consecutiveSilenceFrames++;
+                    if (consecutiveSilenceFrames >= SPEECH_END_FRAMES) {
+                        isSpeaking = false; // Speech ended
+                        silenceStart = Date.now();
+
+                        // Set timeout for final silence detection (End of Turn)
+                        this.silenceTimeout = setTimeout(() => {
+                            if (this.isRecording && onSilenceDetected && !isSpeaking) {
+                                console.log("🛑 Silence Timeout (Silero mode) - Processing Speech");
+                                onSilenceDetected();
+                            }
+                        }, threshold);
+                    }
+                }
+
                 requestAnimationFrame(checkAudio);
                 return;
             }
@@ -349,8 +374,8 @@ class AudioService {
             if (averageVoiceEnergy < noiseFloor * 1.5) {
                 noiseFloor = (noiseFloor * (1 - NOISE_LEARNING_RATE)) + (averageVoiceEnergy * NOISE_LEARNING_RATE);
             }
-            // Increase absolute minimum noise floor to 35 to reject ANY distant chatters in the room
-            noiseFloor = Math.max(35, Math.min(noiseFloor, 70));
+            // Keep bounds realistic so it never requires > 255 volume to detect speech
+            noiseFloor = Math.max(20, Math.min(noiseFloor, 45));
 
             // --- 2F: Energy Score ---
             const currentSpeechThreshold = noiseFloor * SPEECH_RATIO;
@@ -387,7 +412,7 @@ class AudioService {
             // --- State Machine ---
             // Must beat the relative threshold AND an absolute raw minimum energy (e.g., 75 out of 255)
             // Distant voices typically log very low absolute energy (<40) even if the room is quiet.
-            const isLoud = averageVoiceEnergy > currentSpeechThreshold && averageVoiceEnergy > 75;
+            const isLoud = averageVoiceEnergy > currentSpeechThreshold && averageVoiceEnergy > 45;
 
             if (isLoud && energyScore > 0.45) {
                 consecutiveSilenceFrames = 0;
