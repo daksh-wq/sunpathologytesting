@@ -145,10 +145,12 @@ export const transcribeAudio = async (audioBlob, useFallback = false) => {
         }
 
         const data = await response.json();
-        // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
+        // gemini models might return multiple text parts
         const parts = data.candidates?.[0]?.content?.parts || [];
-        const textPart = parts.filter(p => p.text !== undefined).pop();
-        let transcription = textPart?.text || "";
+        let transcription = parts
+            .filter(p => p.text !== undefined)
+            .map(p => p.text)
+            .join(' ') || "";
 
         // Filter out Gemini audio hallucination text (like timestamps "00:00", "No clear speech", "(vehicle sounds)", etc.)
         transcription = transcription
@@ -373,10 +375,11 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
         }
 
         const data = await response.json();
-        // gemini-2.5-flash returns thinking in earlier parts, actual text in the last part
         const parts = data.candidates?.[0]?.content?.parts || [];
-        const textPart = parts.filter(p => p.text !== undefined).pop();
-        let aiResponse = textPart?.text || "";
+        let aiResponse = parts
+            .filter(p => p.text !== undefined)
+            .map(p => p.text)
+            .join(' ') || "";
 
         // Clean response
         aiResponse = aiResponse.trim()
