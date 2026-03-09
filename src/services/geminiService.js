@@ -275,7 +275,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
     
     - IF customer requests home collection for 1 PERSON, collect these details ONE BY ONE:
     1. Phone Number (ALWAYS ask this first so we can contact them if the call drops)
-    2. Name (CRITICAL INSTRUCTION: NEVER use the word "Patient" or "मरीज़" or "દર્દી". Instead, use phrases like "Jiska report karvana hai unka naam" or "Jemno report karavano che emnu naam")
+    2. Name (CRITICAL INSTRUCTION: NEVER use the word "Patient" or "मरीज़" or "દર્દી". ALWAYS ask clearly using exactly these phrases: "Jiska test karvana hai uska naam bataiye" or "Jemno test karavano che emnu naam shu che?")
     3. Age
     4. Address (CRITICAL INSTRUCTION: If they tell you a very short address like 1-3 words or just a society name, DO NOT accept it. You MUST ask them to describe the complete address properly and ask for a famous place or landmark near their address.)
     5. Test Name(s) / Package Name
