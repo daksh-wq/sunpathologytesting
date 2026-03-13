@@ -146,10 +146,10 @@ class AudioService {
                 },
                 // Tuning parameters
                 positiveSpeechThreshold: 0.95,  // EXTREMELY High threshold for confident speech
-                negativeSpeechThreshold: 0.50,  // Drops out of speech mode very aggressively if voice lowers
-                redemptionFrames: 6,
+                negativeSpeechThreshold: 0.40,  // Drops out of speech mode very aggressively if voice lowers
+                redemptionFrames: 12,           // Tolerate longer pauses/breaths mid-sentence
                 minSpeechFrames: 8,             // Require longer sustained speech (prevents short distant shouts)
-                preSpeechPadFrames: 3,          // Frames to include before speech starts
+                preSpeechPadFrames: 5,          // Frames to include before speech starts
             });
 
             // Start the VAD (it runs independently using AudioWorklet)
@@ -237,7 +237,7 @@ class AudioService {
         this._currentConsecutiveSpeechFrames = 0;
         let consecutiveSilenceFrames = 0;
         const SPEECH_START_FRAMES = 5;  // ~100ms sustained sound to start speech
-        const SPEECH_END_FRAMES = 15;   // ~300ms silence to end speech segment (was 25)
+        const SPEECH_END_FRAMES = 35;   // ~700ms silence to end speech segment (was 15)
 
         // --- PRODUCTION: Instant Barge-In ---
         // 7 Frames * ~20ms = ~140ms of CONTINUOUS speech required.

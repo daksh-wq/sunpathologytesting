@@ -288,7 +288,7 @@ function CallInterface() {
                 // Silence detected - process the speech
                 await processUserSpeech();
             },
-            400, // Silence threshold
+            1200, // Silence threshold (give the user time to breathe or pause)
             handleSpeechStart, // On Speech Start (Barge-in trigger)
             150  // Safeguard delay (150ms to allow instant barge-in without missing their voice)
         );
