@@ -210,8 +210,11 @@ class AudioService {
         const frequencyData = new Uint8Array(bufferLength);
         const timeDomainData = new Uint8Array(bufferLength);
         let silenceStart = null;
-        let isSpeaking = false;
-        let bargeInTriggered = false; // Track if barge-in has fired for this segment
+        this._currentIsSpeaking = false;
+        this._currentBargeInTriggered = false; // Track if barge-in has fired
+        this._currentBargeInCooldownEnd = 0; // Cooldown timer for rejected barge-ins
+        this._currentConsecutiveSpeechFrames = 0;
+        this._currentAvgConfidence = 0;
 
         // Safety: Ignore audio for the first 'safeguardDelay' ms (prevent self-echo)
         const recordingStartTime = Date.now();
@@ -231,7 +234,7 @@ class AudioService {
         const BARGE_IN_RATIO = 4.0; // Interruptions must be noticeably loud
 
         // Temporal Smoothing
-        let consecutiveSpeechFrames = 0;
+        this._currentConsecutiveSpeechFrames = 0;
         let consecutiveSilenceFrames = 0;
         const SPEECH_START_FRAMES = 5;  // ~100ms sustained sound to start speech
         const SPEECH_END_FRAMES = 15;   // ~300ms silence to end speech segment (was 25)
@@ -258,10 +261,11 @@ class AudioService {
             if (Date.now() - recordingStartTime < safeguardDelay || this.currentAudio !== null) {
                 // If bot is speaking, reset all tracking so it doesn't instantly trigger when done
                 if (this.currentAudio !== null) {
-                    consecutiveSpeechFrames = 0;
+                    this._currentConsecutiveSpeechFrames = 0;
                     consecutiveSilenceFrames = 0;
                     confidenceHistory = [];
-                    bargeInTriggered = false;
+                    this._currentBargeInTriggered = false;
+                    this._currentBargeInCooldownEnd = 0;
                 }
                 requestAnimationFrame(checkAudio);
                 return;
@@ -278,19 +282,19 @@ class AudioService {
             // ============================================================
             if (this.sileroReady && !this.sileroSpeaking) {
                 // Silero says no speech — reset counters
-                consecutiveSpeechFrames = 0;
+                this._currentConsecutiveSpeechFrames = 0;
                 confidenceHistory = [];
-                bargeInTriggered = false;
+                this._currentBargeInTriggered = false;
 
-                if (isSpeaking) {
+                if (this._currentIsSpeaking) {
                     consecutiveSilenceFrames++;
                     if (consecutiveSilenceFrames >= SPEECH_END_FRAMES) {
-                        isSpeaking = false; // Speech ended
+                        this._currentIsSpeaking = false; // Speech ended
                         silenceStart = Date.now();
 
                         // Set timeout for final silence detection (End of Turn)
                         this.silenceTimeout = setTimeout(() => {
-                            if (this.isRecording && onSilenceDetected && !isSpeaking) {
+                            if (this.isRecording && onSilenceDetected && !this._currentIsSpeaking) {
                                 console.log("🛑 Silence Timeout (Silero mode) - Processing Speech");
                                 onSilenceDetected();
                             }
@@ -321,7 +325,7 @@ class AudioService {
 
             if (isTransient) {
                 console.log("🚫 Transient Rejected (Click/Pop detected)");
-                consecutiveSpeechFrames = 0;
+                this._currentConsecutiveSpeechFrames = 0;
                 requestAnimationFrame(checkAudio);
                 return;
             }
@@ -402,7 +406,7 @@ class AudioService {
 
             // --- 2G: Temporal Score ---
             // Builds up as more consecutive frames qualify
-            const temporalScore = Math.min(1.0, consecutiveSpeechFrames / BARGE_IN_FRAMES);
+            const temporalScore = Math.min(1.0, this._currentConsecutiveSpeechFrames / BARGE_IN_FRAMES);
 
             // ============================================================
             // MULTI-FACTOR CONFIDENCE SCORE
@@ -416,7 +420,7 @@ class AudioService {
             }
 
             // Average confidence over window (smoothing)
-            const avgConfidence = confidenceHistory.reduce((a, b) => a + b, 0) / confidenceHistory.length;
+            this._currentAvgConfidence = confidenceHistory.reduce((a, b) => a + b, 0) / confidenceHistory.length;
 
             // --- State Machine ---
             // Must beat the relative threshold AND an absolute raw minimum energy (e.g., 75 out of 255)
@@ -425,11 +429,11 @@ class AudioService {
 
             if (isLoud && energyScore > 0.45) {
                 consecutiveSilenceFrames = 0;
-                consecutiveSpeechFrames++;
+                this._currentConsecutiveSpeechFrames++;
 
-                if (!isSpeaking && consecutiveSpeechFrames >= SPEECH_START_FRAMES) {
+                if (!this._currentIsSpeaking && this._currentConsecutiveSpeechFrames >= SPEECH_START_FRAMES) {
                     // Valid Speech Started
-                    isSpeaking = true;
+                    this._currentIsSpeaking = true;
                     silenceStart = null;
                     if (this.silenceTimeout) {
                         clearTimeout(this.silenceTimeout);
@@ -438,21 +442,30 @@ class AudioService {
                 }
 
                 // Evaluate Barge-In trigger while speaking
-                if (isSpeaking && onSpeechStart && !bargeInTriggered) {
-                    const bargeInConfidenceThreshold = consecutiveSpeechFrames < 10 ? 0.80 : 0.65;
+                if (this._currentIsSpeaking && onSpeechStart && !this._currentBargeInTriggered && Date.now() > this._currentBargeInCooldownEnd) {
+                    const bargeInConfidenceThreshold = this._currentConsecutiveSpeechFrames < 10 ? 0.80 : 0.65;
 
-                    if (consecutiveSpeechFrames >= BARGE_IN_FRAMES && avgConfidence >= bargeInConfidenceThreshold) {
+                    if (this._currentConsecutiveSpeechFrames >= BARGE_IN_FRAMES && this._currentAvgConfidence >= bargeInConfidenceThreshold) {
                         console.log(
-                            `✅ INSTANT BARGE-IN ACCEPTED | Confidence: ${(avgConfidence * 100).toFixed(1)}% | ` +
+                            `✅ INSTANT BARGE-IN TRIGGERED | Confidence: ${(this._currentAvgConfidence * 100).toFixed(1)}% | ` +
                             `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} (${zcrScore.toFixed(2)}) | ` +
                             `Flux: ${spectralFlux.toFixed(1)} (${fluxScore.toFixed(2)}) | ` +
-                            `Frames: ${consecutiveSpeechFrames} | Silero: ${this.sileroReady ? (this.sileroSpeaking ? 'SPEECH' : 'SILENT') : 'N/A'}`
+                            `Frames: ${this._currentConsecutiveSpeechFrames} | Silero: ${this.sileroReady ? (this.sileroSpeaking ? 'SPEECH' : 'SILENT') : 'N/A'}`
                         );
-                        bargeInTriggered = true;
-                        onSpeechStart();
-                    } else if (consecutiveSpeechFrames === BARGE_IN_FRAMES && avgConfidence < bargeInConfidenceThreshold) {
+                        this._currentBargeInTriggered = true;
+                        
+                        // Pass exact properties for Multi-Stage verification
+                        const currentChunk = this.audioChunks.length > 0 ? new Blob(this.audioChunks, { type: 'audio/webm' }) : null;
+                        const speechDuration = this._currentConsecutiveSpeechFrames * (1000 / 60);
+
+                        onSpeechStart({
+                            probability: this._currentAvgConfidence,
+                            duration: speechDuration,
+                            blob: currentChunk
+                        });
+                    } else if (this._currentConsecutiveSpeechFrames === BARGE_IN_FRAMES && this._currentAvgConfidence < bargeInConfidenceThreshold) {
                         console.log(
-                            `🚫 REJECTED (Low Confidence) | Confidence: ${(avgConfidence * 100).toFixed(1)}% ` +
+                            `🚫 REJECTED (Low Confidence) | Confidence: ${(this._currentAvgConfidence * 100).toFixed(1)}% ` +
                             `(need ${(bargeInConfidenceThreshold * 100).toFixed(0)}%) | ` +
                             `Energy: ${energyScore.toFixed(2)} | ZCR: ${zcr.toFixed(3)} | Flux: ${spectralFlux.toFixed(1)}`
                         );
@@ -460,19 +473,19 @@ class AudioService {
                 }
             } else {
                 // Quiet
-                consecutiveSpeechFrames = 0;
+                this._currentConsecutiveSpeechFrames = 0;
                 confidenceHistory = [];
-                bargeInTriggered = false;
+                // Do not reset bargeInTriggered here until the pipeline fully decides.
 
-                if (isSpeaking) {
+                if (this._currentIsSpeaking) {
                     consecutiveSilenceFrames++;
                     if (consecutiveSilenceFrames >= SPEECH_END_FRAMES) {
-                        isSpeaking = false; // Speech ended
+                        this._currentIsSpeaking = false; // Speech ended
                         silenceStart = Date.now();
 
                         // Set timeout for final silence detection (End of Turn)
                         this.silenceTimeout = setTimeout(() => {
-                            if (this.isRecording && onSilenceDetected && !isSpeaking) {
+                            if (this.isRecording && onSilenceDetected && !this._currentIsSpeaking) {
                                 console.log("🛑 Silence Timeout - Processing Speech");
                                 onSilenceDetected();
                             }
@@ -485,6 +498,22 @@ class AudioService {
         };
 
         checkAudio();
+    }
+
+    // Pipeline Helpers for Double Verification
+    getCurrentSpeechStatus() {
+        const currentChunk = this.audioChunks && this.audioChunks.length > 0 ? new Blob(this.audioChunks, { type: 'audio/webm' }) : null;
+        return {
+            isSpeaking: this._currentIsSpeaking || false,
+            duration: (this._currentConsecutiveSpeechFrames || 0) * (1000 / 60),
+            probability: this._currentAvgConfidence || 0,
+            blob: currentChunk
+        };
+    }
+
+    resetBargeInTrigger(cooldownMs = 800) {
+        this._currentBargeInTriggered = false;
+        this._currentBargeInCooldownEnd = Date.now() + cooldownMs;
     }
 
     // Stop recording and return audio blob

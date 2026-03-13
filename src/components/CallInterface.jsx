@@ -4,6 +4,7 @@ import { useCall } from '../context/CallContext';
 import { audioService } from '../services/audioService';
 import { transcribeAudio, generateResponse } from '../services/geminiService';
 import { synthesizeSpeech } from '../services/elevenlabsService';
+import { speakerVerification } from '../services/speakerVerificationService';
 
 // SVG Icons
 const PhoneIcon = ({ size = 32 }) => (
@@ -95,6 +96,7 @@ function CallInterface() {
     const [isReported, setIsReported] = useState(false);
     const [feedbackText, setFeedbackText] = useState('');
     const [feedbackSent, setFeedbackSent] = useState(false);
+    const [baselineRegistered, setBaselineRegistered] = useState(false);
     const transcriptRef = useRef(null);
     const latestTranscriptRef = useRef(transcript); // Track latest transcript for closures
     const timerRef = useRef(null);
@@ -182,6 +184,7 @@ function CallInterface() {
         try {
             setError(null);
             setIsReported(false);
+            setBaselineRegistered(false); // Reset for new call
             startCall();
 
             // Initialize audio
@@ -220,11 +223,63 @@ function CallInterface() {
         }
 
         // Handle Barge-in: User starts speaking while bot is talking
-        const handleSpeechStart = () => {
+        const handleSpeechStart = async (bargeInData) => {
             if (aiStatus === 'speaking' || audioService.currentAudio) {
-                console.log("Barge-in detected! Stopping playback.");
-                audioService.stopPlayback();
-                updateAiStatus('listening');
+                if (!bargeInData) {
+                    console.log("Legacy Barge-in detected! Stopping playback.");
+                    audioService.stopPlayback();
+                    updateAiStatus('listening');
+                    return;
+                }
+
+                console.log(`🔍 Barge-in Phase 1: Prob: ${bargeInData.probability.toFixed(2)}`);
+
+                let similarity1 = 1.0;
+                // Only verify if baseline was already registered
+                if (bargeInData.blob && currentCall && currentCall.id) {
+                    similarity1 = await speakerVerification.verifyChunk(currentCall.id, bargeInData.blob);
+                }
+
+                if (similarity1 < 0.3) { // Fast fail for completely wrong speaker
+                    console.log("🚫 Barge-in rejected Phase 1. Wrong speaker.");
+                    audioService.resetBargeInTrigger(); 
+                    return;
+                }
+
+                // Wait 200ms for Phase 2 Verification
+                await new Promise(r => setTimeout(r, 200));
+
+                const currentStatus = audioService.getCurrentSpeechStatus();
+                // Enforce Minimum Duration rules (Step 5)
+                if (!currentStatus.isSpeaking || currentStatus.duration < 300) {
+                     console.log(`🚫 Barge-in rejected Phase 2. Duration too short (${currentStatus.duration.toFixed(0)} ms).`);
+                     audioService.resetBargeInTrigger();
+                     return;
+                }
+
+                let similarity2 = 1.0;
+                if (currentStatus.blob && currentCall && currentCall.id) {
+                    similarity2 = await speakerVerification.verifyChunk(currentCall.id, currentStatus.blob);
+                }
+
+                const avgSimilarity = (similarity1 + similarity2) / 2;
+                
+                // Final Confidence Score Computation (Step 7)
+                const duration_score = Math.min(1.0, currentStatus.duration / 400); 
+                const context_score = 0.5; // Interruptions naturally lower context score
+
+                const confidence = (0.4 * avgSimilarity) + (0.3 * currentStatus.probability) + (0.2 * duration_score) + (0.1 * context_score);
+
+                console.log(`🎯 Final Confidence: ${confidence.toFixed(2)} (Sim: ${avgSimilarity.toFixed(2)}, Prob: ${currentStatus.probability.toFixed(2)}, Dur: ${duration_score.toFixed(2)})`);
+
+                if (confidence > 0.65) {
+                     console.log("✅ Verified Double Barge-in! Stopping playback.");
+                     audioService.stopPlayback();
+                     updateAiStatus('listening');
+                } else {
+                     console.log("🚫 Barge-in rejected. Low final confidence.");
+                     audioService.resetBargeInTrigger();
+                }
             }
         };
 
@@ -237,7 +292,7 @@ function CallInterface() {
             handleSpeechStart, // On Speech Start (Barge-in trigger)
             150  // Safeguard delay (150ms to allow instant barge-in without missing their voice)
         );
-    }, [aiStatus, updateAiStatus]);
+    }, [aiStatus, updateAiStatus, currentCall]);
 
     // Semantic Filter: Ignore these phrases as "Barge-in"
     // We use exact word matching to avoid false positives (e.g. "aa" matching "aaj")
@@ -265,6 +320,15 @@ function CallInterface() {
                 console.log("Empty transcription, resuming listening...");
                 startListening();
                 return;
+            }
+
+            // Register baseline for Caller Verification right after first speech
+            if (!baselineRegistered && currentCall && currentCall.id) {
+                console.log("Registering baseline caller voice...");
+                speakerVerification.registerBaseline(currentCall.id, audioBlob)
+                    .then(success => {})
+                    .catch(e => console.error("Baseline verification error", e));
+                setBaselineRegistered(true);
             }
 
             // Removed excessively strict single-word and affirmative bans
