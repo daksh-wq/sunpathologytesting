@@ -366,7 +366,7 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
                 }],
                 generationConfig: {
                     temperature: 0.6,
-                    maxOutputTokens: 150,
+                    maxOutputTokens: 300,
                     topP: 0.95,
                     topK: 40
                 },
@@ -409,7 +409,6 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
         // Ensure the sentence ends properly (fix fragmented/cut-off endings)
         aiResponse = aiResponse
             .replace(/,\s*$/, '.') // Replace trailing comma with full stop
-            .replace(/\s+(and|aur|ane|vager|वगैरह|વગેરે)\s*$/i, '.') // Remove trailing conjunctions
             .trim();
 
         // If it doesn't end with punctuation, add a full stop to ensure TTS voice drops naturally
