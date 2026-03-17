@@ -214,7 +214,17 @@ export const labInfo = {
         "फास्टिंग कितने घंटे": "लिपिड प्रोफाइल, फास्टिंग शुगर, और होमियोसिस्टीन (Homocysteine) के लिए सिर्फ 10-12 घंटे खाली पेट रहना होता है। ओवर-फास्टिंग (12 घंटे से ज्यादा) रिपोर्ट को खराब कर सकती है।",
         "होम कलेक्शन कैसे बुक करें": "एक दिन पहले फोन करें, सुबह 7 बजे से रात 8 बजे के बीच सैंपल कलेक्ट किया जाएगा।",
         "क्या रविवार को खुले हैं": "हाँ, रविवार को भी सुबह 7 बजे से रात 8 बजे तक खुले हैं।",
-        "ऑनलाइन रिपोर्ट कैसे देखें": "व्हाट्सएप पर PDF भेज दी जाती है, या ऑनलाइन पोर्टल पर देख सकते हैं।"
+        "ऑनलाइन रिपोर्ट कैसे देखें": "व्हाट्सएप पर PDF भेज दी जाती है, या ऑनलाइन पोर्टल पर देख सकते हैं।",
+        "What time does the lab open?": "Most Sun Pathology centers start sample collection from 6 AM.",
+        "Do you provide home collection?": "Yes, we provide home sample collection across Ahmedabad.",
+        "How will I receive my report?": "Reports are delivered through: SMS, WhatsApp, Email, Website login.",
+        "How long does it take to get reports?": "Report timing depends on the test. Most routine tests are available within same day.",
+        "Do I need fasting for blood tests?": "Some tests such as lipid profile or fasting blood sugar require fasting for 8–12 hours.",
+        "Do you accept digital payments?": "Yes, we accept UPI, credit cards, debit cards, and POS machine payments.",
+        "Is Sun Pathology NABL certified?": "Sun Pathology follows NABL quality standards and uses advanced diagnostic technology.",
+        "Can I book a full body check-up?": "Yes, Sun Pathology offers multiple full body check-up packages at discounted prices.",
+        "What is the contact number?": "You can contact Sun Pathology at 079-67006700.",
+        "How many branches do you have?": "Sun Pathology currently has multiple centers across Ahmedabad for convenient sample collection."
     }
 };
 

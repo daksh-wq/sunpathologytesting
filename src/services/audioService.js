@@ -163,8 +163,8 @@ class AudioService {
         }
     }
 
-    // Start recording audio - INCREASED DEFAULT SILENCE THRESHOLD from 1500 to 2500
-    startRecording(onSilenceDetected, silenceThreshold = 2500, onSpeechStart = null, safeguardDelay = 1000) {
+    // Start recording audio - Decreased silence threshold for faster replies
+    startRecording(onSilenceDetected, silenceThreshold = 800, onSpeechStart = null, safeguardDelay = 1000) {
         if (!this.stream) {
             throw new Error('Audio not initialized');
         }
@@ -237,7 +237,7 @@ class AudioService {
         this._currentConsecutiveSpeechFrames = 0;
         let consecutiveSilenceFrames = 0;
         const SPEECH_START_FRAMES = 5;  // ~100ms sustained sound to start speech
-        const SPEECH_END_FRAMES = 35;   // ~700ms silence to end speech segment (was 15)
+        const SPEECH_END_FRAMES = 25;   // ~500ms silence to end speech segment (was 35)
 
         // --- PRODUCTION: Instant Barge-In ---
         // 7 Frames * ~20ms = ~140ms of CONTINUOUS speech required.

@@ -57,9 +57,8 @@ export const synthesizeSpeech = async (text, voiceId = DEFAULT_VOICE_ID) => {
         // Falling back to 'eleven_flash_v2_5' for other languages
         const modelId = isGujaratiText ? "eleven_v3" : "eleven_flash_v2_5";
 
-        // Removed optimize_streaming_latency to prevent sentence cut-offs
-        // Waiting for the full generation ensures the ending intonation is complete
-        const apiUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+        // Add streaming optimization to reduce generation latency even when requesting full blob
+        const apiUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?optimize_streaming_latency=3`;
 
         // Optimize voice settings based on language
         // Gujarati needs slightly different settings for clearer pronunciation
@@ -114,7 +113,7 @@ export const synthesizeSpeech = async (text, voiceId = DEFAULT_VOICE_ID) => {
 // Fallback synthesis with multilingual v2 model
 const synthesizeSpeechFallback = async (text, voiceId, voiceSettings) => {
     // Removed optimize_streaming_latency to ensure full sentence completion
-    const apiUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
+    const apiUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?optimize_streaming_latency=3`;
 
     const response = await fetch(apiUrl, {
         method: 'POST',
