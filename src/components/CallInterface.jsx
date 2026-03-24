@@ -344,6 +344,19 @@ function CallInterface() {
                 if (streamComplete) updateAiStatus('listening');
             };
 
+            // Native browser TTS Fallback to guarantee voices never fail
+            const fallbackTTS = (text) => {
+                return new Promise((resolve) => {
+                    if (!window.speechSynthesis) return resolve(null);
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'hi-IN'; // Works for Gujarati/Hindi mix fallback
+                    utterance.rate = 1.05;
+                    utterance.onend = () => resolve(null);
+                    utterance.onerror = () => resolve(null);
+                    window.speechSynthesis.speak(utterance);
+                });
+            };
+
             for await (const token of stream) {
                 fullResponse += token;
                 currentSentenceQueue += token;
@@ -351,7 +364,10 @@ function CallInterface() {
                 if (/[.!?|।\n]/.test(token)) {
                     const textToSpeak = currentSentenceQueue.trim();
                     if (textToSpeak.length > 2) {
-                        const ttsPromise = synthesizeSpeech(textToSpeak);
+                        const ttsPromise = synthesizeSpeech(textToSpeak).catch(err => {
+                            console.error("ElevenLabs totally failed. Firing native TTS fallback.", err);
+                            return fallbackTTS(textToSpeak);
+                        });
                         audioService.enqueueAudioPromise(ttsPromise, checkDone);
                     }
                     currentSentenceQueue = "";
@@ -361,7 +377,9 @@ function CallInterface() {
             streamComplete = true; // Generator exhausted
             const leftover = currentSentenceQueue.trim();
             if (leftover.length > 1) {
-                const ttsPromise = synthesizeSpeech(leftover);
+                const ttsPromise = synthesizeSpeech(leftover).catch(err => {
+                    return fallbackTTS(leftover);
+                });
                 audioService.enqueueAudioPromise(ttsPromise, checkDone);
             } else if (!audioService.isPlayingQueue) {
                 // Stream exhausted naturally exactly on a chunk boundary
@@ -375,6 +393,15 @@ function CallInterface() {
         } catch (err) {
             console.error('Processing error:', err);
             setError('Processing failed. Please try again.');
+            
+            // Speak a graceful fallback error natively so the user knows what happened
+            if (window.speechSynthesis) {
+                const utterance = new SpeechSynthesisUtterance("માફ કરજો, નેટવર્ક અથવા કનેક્શન ની સમસ્યા છે. જરા ફરીથી બોલશો?");
+                utterance.lang = 'gu-IN';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+            
             startListening();
         }
     };

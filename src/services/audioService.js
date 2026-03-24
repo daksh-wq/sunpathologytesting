@@ -564,7 +564,9 @@ class AudioService {
                 // If barge-in happened while waiting for TTS, abort playback
                 if (!this.isPlayingQueue) break;
                 
-                await this.playAudio(audioBlob);
+                if (audioBlob) {
+                    await this.playAudio(audioBlob);
+                }
             } catch (err) {
                 console.error("Queue playback error", err);
             }
