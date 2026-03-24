@@ -273,29 +273,40 @@ export const generateResponseStream = async function* (userMessage, conversation
         const activeUrl = useFallback ? API_URL_FALLBACK : API_URL_PRIMARY;
         const streamUrl = activeUrl.replace(':generateContent', ':streamGenerateContent?alt=sse');
 
-        const response = await fetch(`${streamUrl}&key=${API_KEY}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }],
-                generationConfig: {
-                    temperature: 0.6,
-                    maxOutputTokens: 1000,
-                    topP: 0.95,
-                    topK: 40
+        let response;
+        try {
+            response = await fetch(`${streamUrl}&key=${API_KEY}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                ]
-            })
-        });
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: prompt }]
+                    }],
+                    generationConfig: {
+                        temperature: 0.6,
+                        maxOutputTokens: 1000,
+                        topP: 0.95,
+                        topK: 40
+                    },
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                })
+            });
+        } catch (fetchErr) {
+            console.error("Fetch level network error:", fetchErr);
+            if (!useFallback) {
+                console.warn("Primary fetch completely failed. Hard retrying with fallback...");
+                yield* generateResponseStream(userMessage, conversationHistory, true);
+                return;
+            }
+            throw fetchErr;
+        }
 
         if (!response.ok) {
             if (!useFallback) {
@@ -308,13 +319,15 @@ export const generateResponseStream = async function* (userMessage, conversation
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
+        let buffer = '';
 
         while (true) {
             const { value, done } = await reader.read();
             if (done) break;
 
-            const chunkStr = decoder.decode(value, { stream: true });
-            const lines = chunkStr.split('\n');
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop(); // Keep the last incomplete line in the buffer
             
             for (const line of lines) {
                 if (line.startsWith('data: ')) {
