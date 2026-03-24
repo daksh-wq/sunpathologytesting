@@ -16,6 +16,10 @@ class AudioService {
         this.sileroVAD = null;
         this.sileroSpeaking = false;
         this.sileroReady = false;
+
+        // Streaming Queue State
+        this.audioQueuePromises = [];
+        this.isPlayingQueue = false;
     }
 
     // Initialize audio context, microphone, and Silero VAD
@@ -541,8 +545,42 @@ class AudioService {
         });
     }
 
+    enqueueAudioPromise(promise, onQueueEmpty) {
+        this.audioQueuePromises.push(promise);
+        // Store callback to notify when queue finishes
+        this.onQueueEmpty = onQueueEmpty || this.onQueueEmpty;
+        
+        if (!this.isPlayingQueue) {
+            this.playQueue();
+        }
+    }
+
+    async playQueue() {
+        this.isPlayingQueue = true;
+        while (this.audioQueuePromises.length > 0) {
+            const nextPromise = this.audioQueuePromises.shift();
+            try {
+                const audioBlob = await nextPromise;
+                // If barge-in happened while waiting for TTS, abort playback
+                if (!this.isPlayingQueue) break;
+                
+                await this.playAudio(audioBlob);
+            } catch (err) {
+                console.error("Queue playback error", err);
+            }
+        }
+        this.isPlayingQueue = false;
+        
+        // Notify that the whole stream of chunks finished naturally
+        if (this.onQueueEmpty && !this.currentAudio) {
+            this.onQueueEmpty();
+        }
+    }
+
     // Stop current playback
     stopPlayback() {
+        this.audioQueuePromises = []; // Clear pending chunks entirely
+        this.isPlayingQueue = false;
         if (this.currentAudio) {
             console.log("🛑 Stopping Playback (Barge-in)");
             this.currentAudio.pause();

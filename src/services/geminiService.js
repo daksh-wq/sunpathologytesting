@@ -108,7 +108,7 @@ A: "ચોક્કસ, મહેરબાની કરીને તમારો
 - FINISH FULL SENTENCES. DO NOT CUT OFF ABRUPTLY.`;
 
 // Convert audio blob to base64 removed (Migrated STT to Sarvam AI)
-export const generateResponse = async (userMessage, conversationHistory = [], useFallback = false) => {
+export const generateResponseStream = async function* (userMessage, conversationHistory = [], useFallback = false) {
     try {
         // Detect Initial Query (First thing customer said)
         const initialQuery = conversationHistory.find(msg => msg.role === 'user')?.text || userMessage;
@@ -298,51 +298,43 @@ export const generateResponse = async (userMessage, conversationHistory = [], us
 
         if (!response.ok) {
             if (!useFallback) {
-                console.warn(`Primary model response generation failed (Status: ${response.status}). Retrying with fallback model...`);
-                return await generateResponse(userMessage, conversationHistory, true);
+                console.warn(`Primary model stream failed (Status: ${response.status}). Retrying with fallback...`);
+                yield* generateResponseStream(userMessage, conversationHistory, true);
+                return;
             }
-            const errorData = await response.text();
-            console.error('Gemini error:', errorData);
-            throw new Error(`API error: ${response.status} `);
+            throw new Error(`API error: ${response.status}`);
         }
 
-        const data = await response.json();
-        const parts = data.candidates?.[0]?.content?.parts || [];
-        let aiResponse = parts
-            .filter(p => p.text !== undefined)
-            .map(p => p.text)
-            .join(' ') || "";
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
 
-        // Clean response
-        aiResponse = aiResponse.trim()
-            .replace(/\*+/g, '')
-            .replace(/#+/g, '')
-            .replace(/^["']|["']$/g, '')
-            .replace(/^શીતલ:\s*/i, '')  // Remove "Sheetal:" prefix (Gujarati)
-            .replace(/^शीतल:\s*/i, '')   // Remove "Sheetal:" prefix (Hindi)
-            .replace(/^Sheetal:\s*/i, '')   // Remove "Sheetal:" prefix (English)
-            .replace(/^\[.*?\]\s*/g, '');   // Remove any bracketed prefixes
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
 
-        // Ensure the sentence ends properly (fix fragmented/cut-off endings)
-        aiResponse = aiResponse
-            .replace(/,\s*$/, '.') // Replace trailing comma with full stop
-            .trim();
-
-        // If it doesn't end with punctuation, add a full stop to ensure TTS voice drops naturally
-        if (!/[.!?|।]$/.test(aiResponse) && aiResponse.length > 0) {
-            aiResponse += '.';
+            const chunkStr = decoder.decode(value, { stream: true });
+            const lines = chunkStr.split('\n');
+            
+            for (const line of lines) {
+                if (line.startsWith('data: ')) {
+                    const dataStr = line.replace('data: ', '').trim();
+                    if (!dataStr) continue;
+                    try {
+                        const data = JSON.parse(dataStr);
+                        let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (text) {
+                            text = text.replace(/\*+/g, '').replace(/#+/g, '');
+                            yield text;
+                        }
+                    } catch (e) {
+                         // silent parse fail on broken chunks
+                    }
+                }
+            }
         }
-
-        return aiResponse;
     } catch (error) {
-        console.error('Response error:', error);
-        // Human-like error responses
-        const errorResponses = [
-            "अरे... एक second, connection थोड़ा slow है। दोबारा बोलिए ना।",
-            "माफ़ कीजिए, सुनाई नहीं दिया ठीक से। एक बार और बोलिए।",
-            "हाँ जी, बस एक moment... हाँ बोलिए।"
-        ];
-        return errorResponses[Math.floor(Math.random() * errorResponses.length)];
+        console.error('Response stream error:', error);
+        yield "માફ કરજો, નેટવર્ક અથવા કનેક્શન ની સમસ્યા છે. જરા એક જરા ફરીથી બોલશો.";
     }
 };
 

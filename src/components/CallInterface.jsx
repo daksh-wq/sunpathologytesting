@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCall } from '../context/CallContext';
 import { audioService } from '../services/audioService';
-import { generateResponse } from '../services/geminiService';
+import { generateResponseStream } from '../services/geminiService';
 import { transcribeAudio } from '../services/sarvamService';
 import { synthesizeSpeech } from '../services/elevenlabsService';
 import { speakerVerification } from '../services/speakerVerificationService';
@@ -154,28 +154,17 @@ function CallInterface() {
         return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
-    // Helper: Play response (Simultaneous: Speak + Listen for Barge-in)
+    // Helper: Play complete response (Used for welcome fallback)
     const playResponse = async (text) => {
         try {
             const audioBlob = await synthesizeSpeech(text);
-
-            // 1. Start Listening (Mic open for barge-in)
-            // Note: We do this BEFORE playing so we catch early interruptions
             startListening();
-
-            // 2. Update Status to Speak (Visually)
             updateAiStatus('speaking');
-
-            // 3. Play Audio
-            await audioService.playAudio(audioBlob);
-
-            // 4. Finished (Naturally or interrupted)
-            // If natural finish, swap back to listening status explicitly
-            updateAiStatus('listening');
-
+            audioService.enqueueAudioPromise(Promise.resolve(audioBlob), () => {
+                updateAiStatus('listening');
+            });
         } catch (err) {
             console.warn('Playback interrupted or failed:', err);
-            // Ensure we are in listening state
             updateAiStatus('listening');
         }
     };
@@ -199,10 +188,11 @@ function CallInterface() {
 
             // Play pre-loaded or fresh audio
             if (welcomeAudioRef.current) {
-                await audioService.playAudio(welcomeAudioRef.current);
-                // Start listening after welcome message
-                startListening();
-                updateAiStatus('listening');
+                startListening(); // Open mic for barge in during welcome message!
+                updateAiStatus('speaking');
+                audioService.enqueueAudioPromise(Promise.resolve(welcomeAudioRef.current), () => {
+                    updateAiStatus('listening');
+                });
             } else {
                 await playResponse(WELCOME_MESSAGE);
             }
@@ -225,7 +215,7 @@ function CallInterface() {
 
         // Handle Barge-in: User starts speaking while bot is talking
         const handleSpeechStart = async (bargeInData) => {
-            if (aiStatus === 'speaking' || audioService.currentAudio) {
+            if (aiStatus === 'speaking' || audioService.currentAudio || audioService.isPlayingQueue || audioService.audioQueuePromises.length > 0) {
                 if (!bargeInData) {
                     console.log("Legacy Barge-in detected! Stopping playback.");
                     audioService.stopPlayback();
@@ -289,7 +279,7 @@ function CallInterface() {
                 // Silence detected - process the speech
                 await processUserSpeech();
             },
-            800, // Reduced silence threshold for faster response
+            500, // ULTRA-LOW silence threshold for real-time latency
             handleSpeechStart, // On Speech Start (Barge-in trigger)
             150  // Safeguard delay (150ms to allow instant barge-in without missing their voice)
         );
@@ -341,12 +331,46 @@ function CallInterface() {
             // Add to UI
             await addMessage('user', userText);
 
-            // Fetch AI Response
-            const aiResponse = await generateResponse(userText, currentContext);
-            await addMessage('ai', aiResponse);
+            // Handle Streaming AI Response and Audio Chunking
+            startListening(); // Open mic immediately for barge-in while generating
+            updateAiStatus('speaking');
 
-            // Speak response with barge-in
-            await playResponse(aiResponse);
+            let fullResponse = "";
+            let currentSentenceQueue = "";
+            let streamComplete = false;
+            const stream = generateResponseStream(userText, currentContext);
+
+            const checkDone = () => {
+                if (streamComplete) updateAiStatus('listening');
+            };
+
+            for await (const token of stream) {
+                fullResponse += token;
+                currentSentenceQueue += token;
+
+                if (/[.!?|।\n]/.test(token)) {
+                    const textToSpeak = currentSentenceQueue.trim();
+                    if (textToSpeak.length > 2) {
+                        const ttsPromise = synthesizeSpeech(textToSpeak);
+                        audioService.enqueueAudioPromise(ttsPromise, checkDone);
+                    }
+                    currentSentenceQueue = "";
+                }
+            }
+
+            streamComplete = true; // Generator exhausted
+            const leftover = currentSentenceQueue.trim();
+            if (leftover.length > 1) {
+                const ttsPromise = synthesizeSpeech(leftover);
+                audioService.enqueueAudioPromise(ttsPromise, checkDone);
+            } else if (!audioService.isPlayingQueue) {
+                // Stream exhausted naturally exactly on a chunk boundary
+                checkDone();
+            }
+
+            if (fullResponse.trim()) {
+                await addMessage('ai', fullResponse); // Add complete block to UI transcript
+            }
 
         } catch (err) {
             console.error('Processing error:', err);
