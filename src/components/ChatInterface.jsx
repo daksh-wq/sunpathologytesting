@@ -181,7 +181,7 @@ export default function ChatInterface() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
                 {/* Header */}
                 <div style={{ padding: '20px', background: '#2563eb', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 style={{ margin: 0, fontSize: '1.25rem' }}>💬 LLM Chat Console</h2>
+                    <h2 style={{ margin: 0, fontSize: '1.25rem' }}>LLM Chat Console</h2>
                     <div style={{ display: 'flex', gap: '10px' }}>
                         <button 
                             onClick={handleSpamTest}
@@ -189,14 +189,14 @@ export default function ChatInterface() {
                             style={{ background: '#ef4444', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: isThinking ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '0.875rem' }}
                             title="Sends a spam message to test the AI's safety guardrails"
                         >
-                            🚨 Test Spam
+                            Test Spam
                         </button>
                         <button 
                             onClick={createNewSession}
                             disabled={isThinking}
                             style={{ background: 'rgba(255,255,255,0.2)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '6px', cursor: isThinking ? 'not-allowed' : 'pointer', fontWeight: 'bold', fontSize: '0.875rem' }}
                         >
-                            🛑 End Chat
+                            End Chat
                         </button>
                     </div>
                 </div>
