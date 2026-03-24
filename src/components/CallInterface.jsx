@@ -313,6 +313,19 @@ function CallInterface() {
                 return;
             }
 
+            // STT Hallucination Filter: Drop transcriptions that are just the exact same word repeated endlessly
+            const cleanText = userText.trim().replace(/[.,!?|।]/g, '');
+            const words = cleanText.split(/\s+/);
+            if (words.length >= 3) {
+                // If every single word in the string is exactly the same, it's 100% a model hallucination.
+                const isHallucination = words.every(word => word.toLowerCase() === words[0].toLowerCase());
+                if (isHallucination) {
+                    console.log("🚫 Dropping STT Hallucination:", userText);
+                    startListening();
+                    return;
+                }
+            }
+
             // Register baseline for Caller Verification right after first speech
             if (!baselineRegistered && currentCall && currentCall.id) {
                 console.log("Registering baseline caller voice...");
@@ -357,6 +370,9 @@ function CallInterface() {
                 });
             };
 
+            // Ensure ElevenLabs requests are strictly sequential (concurrency = 1)
+            let ttsFetchQueue = Promise.resolve();
+
             for await (const token of stream) {
                 fullResponse += token;
                 currentSentenceQueue += token;
@@ -364,11 +380,16 @@ function CallInterface() {
                 if (/[.!?|।\n]/.test(token)) {
                     const textToSpeak = currentSentenceQueue.trim();
                     if (textToSpeak.length > 2) {
-                        const ttsPromise = synthesizeSpeech(textToSpeak).catch(err => {
-                            console.error("ElevenLabs totally failed. Firing native TTS fallback.", err);
-                            return fallbackTTS(textToSpeak);
+                        // Queue the fetch so it doesn't slam the ElevenLabs API concurrently
+                        ttsFetchQueue = ttsFetchQueue.then(() => {
+                            const ttsPromise = synthesizeSpeech(textToSpeak).catch(err => {
+                                console.error("ElevenLabs totally failed. Firing native TTS fallback.", err);
+                                return fallbackTTS(textToSpeak);
+                            });
+                            audioService.enqueueAudioPromise(ttsPromise, checkDone);
+                            // Resolving with ttsPromise forces the NEXT queue item to wait for this network request to finish!
+                            return ttsPromise; 
                         });
-                        audioService.enqueueAudioPromise(ttsPromise, checkDone);
                     }
                     currentSentenceQueue = "";
                 }
@@ -377,10 +398,13 @@ function CallInterface() {
             streamComplete = true; // Generator exhausted
             const leftover = currentSentenceQueue.trim();
             if (leftover.length > 1) {
-                const ttsPromise = synthesizeSpeech(leftover).catch(err => {
-                    return fallbackTTS(leftover);
+                ttsFetchQueue = ttsFetchQueue.then(() => {
+                    const ttsPromise = synthesizeSpeech(leftover).catch(err => {
+                        return fallbackTTS(leftover);
+                    });
+                    audioService.enqueueAudioPromise(ttsPromise, checkDone);
+                    return ttsPromise;
                 });
-                audioService.enqueueAudioPromise(ttsPromise, checkDone);
             } else if (!audioService.isPlayingQueue) {
                 // Stream exhausted naturally exactly on a chunk boundary
                 checkDone();
