@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useCall } from '../context/CallContext';
 import { audioService } from '../services/audioService';
-import { transcribeAudio, generateResponse } from '../services/geminiService';
+import { generateResponse } from '../services/geminiService';
+import { transcribeAudio } from '../services/sarvamService';
 import { synthesizeSpeech } from '../services/elevenlabsService';
 import { speakerVerification } from '../services/speakerVerificationService';
 
