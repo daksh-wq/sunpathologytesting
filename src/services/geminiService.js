@@ -3,7 +3,7 @@ import { testPrices, getTestPreparation } from '../data/testPrices';
 import { labInfo } from '../data/labKnowledge';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL_PRIMARY = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+const API_URL_PRIMARY = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 const API_URL_FALLBACK = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
 // Retry logic to handle 429 Too Many Requests
@@ -271,8 +271,9 @@ export const generateResponseStream = async function* (userMessage, conversation
     तुम्हारा जवाब(ग्राहक की भाषा में, 1 - 3 lines, natural conversational tone, friendly receptionist): `;
 
         const activeUrl = useFallback ? API_URL_FALLBACK : API_URL_PRIMARY;
+        const streamUrl = activeUrl.replace(':generateContent', ':streamGenerateContent?alt=sse');
 
-        const response = await fetchWithRetry(`${activeUrl}?key=${API_KEY}`, {
+        const response = await fetch(`${streamUrl}&key=${API_KEY}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
