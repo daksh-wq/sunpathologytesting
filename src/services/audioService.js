@@ -60,16 +60,12 @@ class AudioService {
             highcutFilter.type = 'lowpass';
             highcutFilter.frequency.value = 5500;
 
-            // 2C. Dynamics Compressor (Normalize volume, push down loud background bumps, lift quiet voices)
-            const compressor = this.audioContext.createDynamicsCompressor();
-            compressor.threshold.value = -35;
-            compressor.knee.value = 12;
-            compressor.ratio.value = 4;
-            compressor.attack.value = 0.05;
-            compressor.release.value = 0.25;
+            // 2C. Dynamics Compressor REMOVED.
+            // (Web Audio DynamicsCompressor applies automatic makeup gain which drastically amplifies quiet background fans and humming).
+            // We want absolute silence when not speaking.
 
             // 2E. Hard Noise Gate (Custom AudioWorklet)
-            // Completely mutes audio below a certain threshold to prevent Gemini from transcribing background TV/Chatter
+            // Completely mutes audio below a certain threshold to prevent transcribing background TV/Chatter
             try {
                 await this.audioContext.audioWorklet.addModule('/noiseGateProcessor.js');
                 const noiseGate = new AudioWorkletNode(this.audioContext, 'noise-gate-processor');
@@ -77,25 +73,22 @@ class AudioService {
                 // 2D. Final Output Node for Recording
                 const destination = this.audioContext.createMediaStreamDestination();
 
-                // Connect Recording Chain with Noise Gate
+                // Connect Recording Chain with Noise Gate (Direct path, no compressor)
                 source.connect(lowcutFilter);
                 lowcutFilter.connect(highcutFilter);
-                highcutFilter.connect(compressor);
-                compressor.connect(noiseGate);
+                highcutFilter.connect(noiseGate);
                 noiseGate.connect(destination);
 
                 // Save processed stream for the MediaRecorder
                 this.processedStream = destination.stream;
             } catch (e) {
-                console.warn("Could not load Noise Gate Worklet, falling back to standard compressor", e);
-                // 2D. Final Output Node for Recording
+                console.warn("Could not load Noise Gate Worklet, falling back to clean stream", e);
                 const destination = this.audioContext.createMediaStreamDestination();
 
                 // Connect Recording Chain (Fallback without Noise Gate)
                 source.connect(lowcutFilter);
                 lowcutFilter.connect(highcutFilter);
-                highcutFilter.connect(compressor);
-                compressor.connect(destination);
+                highcutFilter.connect(destination);
 
                 this.processedStream = destination.stream;
             }

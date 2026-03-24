@@ -5,10 +5,11 @@
 class NoiseGateProcessor extends AudioWorkletProcessor {
     constructor() {
         super();
-        this.threshold = 0.03; // Attack threshold (Must be this loud to open gate)
-        this.releaseThreshold = 0.015; // Release threshold (Gate closes if it drops below this)
+        // Very high threshold. Person must speak clearly into mic. Humming/fans are instantly ignored.
+        this.threshold = 0.10; 
+        this.releaseThreshold = 0.04; 
         this.attack = 0.01; // How fast gate opens (seconds)
-        this.release = 0.3; // How long gate stays open after speech ends (seconds)
+        this.release = 0.15; // Cut off dead air faster (0.15s instead of 0.3s)
 
         // Internal state
         this.isOpen = false;
