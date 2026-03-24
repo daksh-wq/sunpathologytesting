@@ -103,8 +103,14 @@ class AudioService {
             analyser.fftSize = 512;
             analyser.smoothingTimeConstant = 0.4; // Smooth out jitter
 
-            // Connect VAD Chain
-            source.connect(vadBandpassFilter);
+            // Connect VAD Chain to the Final PROCESSED audio (Post-Noise Gate!)
+            // This ensures heuristics don't get tricked by background hum that the gate already muted.
+            if (this.processedStream) {
+                const processedSource = this.audioContext.createMediaStreamSource(this.processedStream);
+                processedSource.connect(vadBandpassFilter);
+            } else {
+                source.connect(vadBandpassFilter);
+            }
             vadBandpassFilter.connect(analyser); // Analyze the FILTERED audio
 
             this.analyser = analyser;
@@ -251,6 +257,8 @@ class AudioService {
         let confidenceHistory = [];
         const CONFIDENCE_WINDOW = 10; // Track last 10 confidence values
 
+        const MAX_RECORDING_DURATION_MS = 25000; // Hard stop at 25 seconds to prevent Sarvam 30s limit (400 Bad Request)
+
         const checkAudio = () => {
             if (!this.isRecording) return;
 
@@ -265,6 +273,14 @@ class AudioService {
                     this._currentBargeInCooldownEnd = 0;
                 }
                 requestAnimationFrame(checkAudio);
+                return;
+            }
+
+            // SAFETY: Force-stop if recording goes too long (prevents 30s Sarvam limit)
+            if (Date.now() - recordingStartTime > MAX_RECORDING_DURATION_MS) {
+                console.log("🛑 Hard Max Duration Reached (25s) - Processing Speech immediately.");
+                this._currentIsSpeaking = false;
+                if (onSilenceDetected) onSilenceDetected();
                 return;
             }
 
