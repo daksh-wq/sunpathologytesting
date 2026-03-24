@@ -2,6 +2,7 @@ import { Routes, Route, NavLink } from 'react-router-dom'
 import { CallProvider } from './context/CallContext'
 import CallInterface from './components/CallInterface'
 import Dashboard from './components/Dashboard'
+import ChatInterface from './components/ChatInterface'
 
 // SVG Icons
 const PhoneIcon = () => (
@@ -26,6 +27,12 @@ const LabIcon = () => (
   </svg>
 )
 
+const ChatIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+  </svg>
+)
+
 function App() {
   return (
     <CallProvider>
@@ -45,12 +52,17 @@ function App() {
             <ChartIcon />
             <span>Dashboard</span>
           </NavLink>
+          <NavLink to="/chat" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+            <ChatIcon />
+            <span>LLM Chat</span>
+          </NavLink>
         </nav>
       </header>
       <main>
         <Routes>
           <Route path="/" element={<CallInterface />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/chat" element={<ChatInterface />} />
         </Routes>
       </main>
     </CallProvider>

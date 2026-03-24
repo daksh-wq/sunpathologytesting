@@ -345,16 +345,22 @@ function CallInterface() {
             await addMessage('user', userText);
 
             // Handle Streaming AI Response and Audio Chunking
-            startListening(); // Open mic immediately for barge-in while generating
+            // Removed startListening() here to entirely disable Barge-in. System waits for AI to finish.
             updateAiStatus('speaking');
 
             let fullResponse = "";
             let currentSentenceQueue = "";
             let streamComplete = false;
+            let checkDoneFired = false;
             const stream = generateResponseStream(userText, currentContext);
 
             const checkDone = () => {
-                if (streamComplete) updateAiStatus('listening');
+                // Ensure stream is done fetching AND audio queue is completely empty
+                if (streamComplete && !audioService.isPlayingQueue && !checkDoneFired) {
+                    checkDoneFired = true;
+                    updateAiStatus('listening');
+                    startListening(); // Open microphone strictly AFTER bot finishes speaking completely
+                }
             };
 
             // Native browser TTS Fallback to guarantee voices never fail

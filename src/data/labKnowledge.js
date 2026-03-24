@@ -28,17 +28,17 @@ export const labInfo = {
     workingHours: {
         weekdays: {
             open: "7:00 AM",
-            close: "8:00 PM",
+            close: "9:00 PM",
             hindi: "सुबह 7 बजे से रात 8 बजे तक (सोमवार से शनिवार)"
         },
         sunday: {
-            open: "7:00 AM",
-            close: "8:00 PM",
+            open: "8:00 AM",
+            close: "9:00 PM",
             hindi: "सुबह 7 बजे से रात 8 बजे तक (रविवार सहित)"
         },
         holidays: {
-            open: "7:00 AM",
-            close: "8:00 PM",
+            open: "8:00 AM",
+            close: "9:00 PM",
             hindi: "सुबह 7 बजे से रात 8 बजे तक"
         }
     },

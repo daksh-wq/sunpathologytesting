@@ -240,12 +240,12 @@ class AudioService {
         const VOICE_BIN_END = 36;   // ~3375 Hz
 
         // Dynamic Noise Floor Tracking
-        let noiseFloor = 25; // Sensible baseline. Distant sounds won't easily wake it up.
+        let noiseFloor = 10; // Sensible baseline for RAW uncompressed audio.
         const NOISE_LEARNING_RATE = 0.05; // Faster adaptation to steady noise
 
         // Thresholds (relative to noise floor)
-        const SPEECH_RATIO = 2.5; // Voice must be 2.5x louder than background
-        const BARGE_IN_RATIO = 4.0; // Interruptions must be noticeably loud
+        const SPEECH_RATIO = 2.0; // Voice must be 2.0x louder than background fan
+        const BARGE_IN_RATIO = 3.5; // Interruptions must be noticeably loud
 
         // Temporal Smoothing
         this._currentConsecutiveSpeechFrames = 0;
@@ -268,7 +268,7 @@ class AudioService {
         let confidenceHistory = [];
         const CONFIDENCE_WINDOW = 10; // Track last 10 confidence values
 
-        const MAX_RECORDING_DURATION_MS = 25000; // Hard stop at 25 seconds to prevent Sarvam 30s limit (400 Bad Request)
+        const MAX_RECORDING_DURATION_MS = 29000; // Hard stop at 29 seconds to prevent Sarvam 30s limit (400 Bad Request)
 
         const checkAudio = () => {
             if (!this.isRecording) return;
@@ -289,7 +289,7 @@ class AudioService {
 
             // SAFETY: Force-stop if recording goes too long (prevents 30s Sarvam limit)
             if (Date.now() - recordingStartTime > MAX_RECORDING_DURATION_MS) {
-                console.log("🛑 Hard Max Duration Reached (25s) - Processing Speech immediately.");
+                console.log("🛑 Hard Max Duration Reached (29s) - Processing Speech immediately.");
                 this._currentIsSpeaking = false;
                 if (onSilenceDetected) onSilenceDetected();
                 return;
@@ -411,8 +411,8 @@ class AudioService {
             if (averageVoiceEnergy < noiseFloor * 1.5) {
                 noiseFloor = (noiseFloor * (1 - NOISE_LEARNING_RATE)) + (averageVoiceEnergy * NOISE_LEARNING_RATE);
             }
-            // Keep bounds realistic so it never requires > 255 volume to detect speech
-            noiseFloor = Math.max(20, Math.min(noiseFloor, 45));
+            // Keep bounds realistic for RAW uncompressed audio
+            noiseFloor = Math.max(5, Math.min(noiseFloor, 30));
 
             // --- 2F: Energy Score ---
             const currentSpeechThreshold = noiseFloor * SPEECH_RATIO;
@@ -447,11 +447,11 @@ class AudioService {
             this._currentAvgConfidence = confidenceHistory.reduce((a, b) => a + b, 0) / confidenceHistory.length;
 
             // --- State Machine ---
-            // Must beat the relative threshold AND an absolute raw minimum energy (e.g., 75 out of 255)
-            // Distant voices typically log very low absolute energy (<40) even if the room is quiet.
-            const isLoud = averageVoiceEnergy > currentSpeechThreshold && averageVoiceEnergy > 45;
+            // Must beat the relative threshold AND an absolute raw minimum energy.
+            // Raw uncompressed audio often peaks very low, so 15 is a safe minimum.
+            const isLoud = averageVoiceEnergy > currentSpeechThreshold && averageVoiceEnergy > 15;
 
-            if (isLoud && energyScore > 0.45) {
+            if (isLoud && energyScore > 0.40) {
                 consecutiveSilenceFrames = 0;
                 this._currentConsecutiveSpeechFrames++;
 

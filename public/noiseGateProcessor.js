@@ -5,9 +5,9 @@
 class NoiseGateProcessor extends AudioWorkletProcessor {
     constructor() {
         super();
-        // ULTRA high threshold. Person must speak loudly and closely into mic.
-        this.threshold = 0.20; 
-        this.releaseThreshold = 0.08; 
+        // Calibrated threshold. Filters out distant AC hum/fan noise, but allows standard conversational volume through.
+        this.threshold = 0.05; 
+        this.releaseThreshold = 0.02; 
         this.attack = 0.01; // How fast gate opens (seconds)
         this.release = 0.15; // Cut off dead air faster (0.15s instead of 0.3s)
 
