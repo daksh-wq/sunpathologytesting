@@ -128,10 +128,21 @@ class AudioService {
     // Initialize Silero VAD - Production ML-based voice activity detection
     async _initSileroVAD() {
         try {
+            // Configure ONNX Runtime to load its extremely heavy WASM assets directly from a global CDN.
+            // This entirely circumvents Vercel static routing 404 errors.
+            globalThis.ort = globalThis.ort || {};
+            globalThis.ort.env = globalThis.ort.env || {};
+            globalThis.ort.env.wasm = globalThis.ort.env.wasm || {};
+            globalThis.ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/";
+
             const vadModule = await import('@ricky0123/vad-web');
             const MicVAD = vadModule.MicVAD;
 
             this.sileroVAD = await MicVAD.new({
+                // Hardcode CDN URLs so it never relies on Vercel's missing static /public directory bindings
+                modelURL: "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.30/dist/silero_vad_legacy.onnx",
+                workletURL: "https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.30/dist/vad.worklet.bundle.min.js",
+                
                 // Use the user's existing stream for consistency
                 stream: this.stream,
                 // Speech detection callbacks
