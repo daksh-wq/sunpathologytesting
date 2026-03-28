@@ -486,13 +486,26 @@ export default function TrainModelPanel({ isOpen, onClose }) {
                 /* ─── MOBILE ─── */
                 @media (max-width: 640px) {
                     .tp-overlay { padding: 0; }
-                    .tp-panel { max-width: 100%; height: 100dvh; max-height: none; border-radius: 0; }
-                    .tp-header { padding: 18px 18px 16px; }
-                    .tp-tabs { padding: 0 18px; }
-                    .tp-content { padding: 18px; }
-                    .tp-footer { padding: 14px 18px; }
-                    .tp-footer-actions { width: 100%; justify-content: center; }
-                    .tp-form-actions { flex-wrap: wrap; }
+                    .tp-panel { max-width: 100%; height: 100%; border-radius: 0; }
+                    .tp-header { padding: 18px 16px 16px; }
+                    .tp-tabs { padding: 0 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+                    .tp-tab { padding: 14px 16px; }
+                    .tp-content { padding: 16px; }
+                    .tp-footer { padding: 14px 16px; flex-direction: column; gap: 16px; }
+                    .tp-footer-stats { text-align: center; }
+                    .tp-footer-actions { width: 100%; justify-content: space-between; gap: 8px; display: grid; grid-template-columns: 1fr 1fr 1fr; }
+                    .tp-btn-ghost { justify-content: center; width: 100%; padding: 8px 4px; font-size: 0.72rem; }
+                    
+                    /* Form responsive */
+                    .tp-form-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; width: 100%; }
+                    .tp-form-actions select { width: 100%; }
+                    .tp-btn-add { justify-content: center; width: 100%; }
+                    
+                    /* List responsive */
+                    .tp-item-row { flex-direction: column; gap: 12px; }
+                    .tp-item-actions { width: 100%; justify-content: space-between; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+                    .tp-edit-row { flex-direction: column; align-items: stretch; }
+                    .tp-edit-row button { justify-content: center; width: 100%; }
                 }
             `}</style>
 
