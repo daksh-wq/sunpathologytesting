@@ -39,12 +39,13 @@ body {
   font-family: var(--font-family);
   background: var(--bg-dark);
   color: var(--text-primary);
-  min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Header */
@@ -127,13 +128,14 @@ body {
   animation: spin 1s linear infinite;
 }
 
+
 /* Call Interface */
 .call-interface {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 60px 24px;
-  min-height: calc(100vh - 69px);
+  min-height: calc(100dvh - 69px);
 }
 
 .call-header {
@@ -750,28 +752,138 @@ body {
   background: var(--text-muted);
 }
 
-/* Responsive */
+/* ===== BOTTOM NAV (mobile only) ===== */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  z-index: 200;
+  padding-bottom: env(safe-area-inset-bottom, 0px); /* iPhone home indicator */
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 4px;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 500;
+  transition: color var(--transition-fast);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.bottom-nav-item svg {
+  transition: transform var(--transition-fast);
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+}
+
+.bottom-nav-item:active svg {
+  transform: scale(0.9);
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
+  /* Hide top header on mobile — use bottom nav instead */
   .header {
-    padding: 12px 16px;
+    display: none;
   }
 
+  /* Show bottom nav */
+  .bottom-nav {
+    display: flex;
+  }
+
+  /* Push content above bottom nav (60px nav + safe area) */
+  .app-main {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Call interface */
   .call-interface {
-    padding: 40px 16px;
+    padding: 24px 16px;
+    min-height: calc(100dvh - 64px);
+  }
+
+  .call-header {
+    margin-bottom: 28px;
+  }
+
+  .call-header h1 {
+    font-size: 1.4rem;
+  }
+
+  .call-status-card {
+    padding: 20px 20px;
   }
 
   .call-button {
-    width: 100px;
-    height: 100px;
-    font-size: 2rem;
+    width: 110px;
+    height: 110px;
+    font-size: 2.2rem;
   }
 
+  /* Dashboard */
   .dashboard {
-    padding: 20px 16px;
+    padding: 16px 12px;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
   }
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .stat-card .value {
+    font-size: 1.4rem;
+  }
+
+  /* Make the calls table scrollable horizontally */
+  .calls-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .calls-table th,
+  .calls-table td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  /* Transcript panel */
+  .transcript-panel {
+    padding: 14px;
+    margin-top: 20px;
+  }
+
+  /* Modal */
+  .modal-content {
+    margin: 16px;
+    padding: 24px 20px;
   }
 }
 
