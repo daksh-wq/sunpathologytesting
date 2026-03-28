@@ -2,7 +2,7 @@
 // Uses multilingual voice for natural Hindi and Gujarati speech
 import { audioService } from './audioService';
 
-const API_KEY = import.meta.env.VITE_ELEVENLABS_API_KEY;
+const PROXY_URL = '/api/elevenlabs';
 
 // Voice options for Indian languages
 // Arvi - Best for natural Hindi/Gujarati conversations (lively, authentic, desi appeal)
@@ -76,23 +76,20 @@ export const synthesizeSpeech = async (text, voiceId = DEFAULT_VOICE_ID) => {
 
         console.log(`TTS: ${isGujaratiText ? 'Gujarati' : 'Hindi'} detected, using model: ${modelId}`);
 
-        const response = await fetch(apiUrl, {
+        const response = await fetch(PROXY_URL, {
             method: 'POST',
-            headers: {
-                'Accept': 'audio/mpeg',
-                'Content-Type': 'application/json',
-                'xi-api-key': API_KEY
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+                voiceId,
                 text: processedText,
-                model_id: modelId,
-                voice_settings: voiceSettings
+                modelId,
+                voiceSettings,
             })
         });
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('ElevenLabs error:', errorText);
+            console.error('ElevenLabs proxy error:', errorText);
 
             // Fallback to multilingual v2 if flash model fails
             if (modelId === "eleven_flash_v2_5") {
@@ -115,17 +112,14 @@ const synthesizeSpeechFallback = async (text, voiceId, voiceSettings) => {
     // Removed optimize_streaming_latency to ensure full sentence completion
     const apiUrl = `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`;
 
-    const response = await fetch(apiUrl, {
+    const response = await fetch(PROXY_URL, {
         method: 'POST',
-        headers: {
-            'Accept': 'audio/mpeg',
-            'Content-Type': 'application/json',
-            'xi-api-key': API_KEY
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            text: text,
-            model_id: "eleven_multilingual_v2",
-            voice_settings: voiceSettings
+            voiceId,
+            text,
+            modelId: 'eleven_multilingual_v2',
+            voiceSettings,
         })
     });
 

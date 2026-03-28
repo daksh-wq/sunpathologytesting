@@ -2,9 +2,7 @@ import { getReportStatusResponse } from '../data/mockReportSystem';
 import { testPrices, getTestPreparation } from '../data/testPrices';
 import { labInfo } from '../data/labKnowledge';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL_PRIMARY = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
-const API_URL_FALLBACK = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
+const API_PROXY_URL = '/api/gemini';
 
 // Retry logic to handle 429 Too Many Requests
 const fetchWithRetry = async (url, options, maxRetries = 3) => {
@@ -261,32 +259,30 @@ export const generateResponseStream = async function* (userMessage, conversation
 
     तुम्हारा जवाब(ग्राहक की भाषा में, 1 - 3 lines, natural conversational tone, friendly receptionist): `;
 
-        const activeUrl = useFallback ? API_URL_FALLBACK : API_URL_PRIMARY;
-        const streamUrl = activeUrl.replace(':generateContent', ':streamGenerateContent?alt=sse');
-
         let response;
         try {
-            response = await fetch(`${streamUrl}&key=${API_KEY}`, {
+            response = await fetch(API_PROXY_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [{ text: prompt }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.6,
-                        maxOutputTokens: 1000,
-                        topP: 0.95,
-                        topK: 40
-                    },
-                    safetySettings: [
-                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                    ]
+                    stream: true,
+                    body: {
+                        contents: [{
+                            parts: [{ text: prompt }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.6,
+                            maxOutputTokens: 1000,
+                            topP: 0.95,
+                            topK: 40
+                        },
+                        safetySettings: [
+                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                        ]
+                    }
                 })
             });
         } catch (fetchErr) {
@@ -300,11 +296,6 @@ export const generateResponseStream = async function* (userMessage, conversation
         }
 
         if (!response.ok) {
-            if (!useFallback) {
-                console.warn(`Primary model stream failed (Status: ${response.status}). Retrying with fallback...`);
-                yield* generateResponseStream(userMessage, conversationHistory, true);
-                return;
-            }
             throw new Error(`API error: ${response.status}`);
         }
 
