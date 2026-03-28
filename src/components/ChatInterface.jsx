@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { generateResponseStream } from '../services/geminiService';
+import TrainModelPanel from './TrainModelPanel';
 
 export default function ChatInterface() {
     const [sessions, setSessions] = useState(() => {
@@ -14,6 +15,7 @@ export default function ChatInterface() {
     const [inputValue, setInputValue] = useState('');
     const [isThinking, setIsThinking] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [trainPanelOpen, setTrainPanelOpen] = useState(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -220,6 +222,24 @@ export default function ChatInterface() {
                     white-space: nowrap;
                     -webkit-tap-highlight-color: transparent;
                 }
+                .btn-train {
+                    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                    color: white;
+                    border: none;
+                    padding: 8px 14px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-weight: 600;
+                    font-size: 0.825rem;
+                    white-space: nowrap;
+                    -webkit-tap-highlight-color: transparent;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    transition: filter 0.15s, transform 0.15s;
+                }
+                .btn-train:hover { filter: brightness(1.15); transform: translateY(-1px); }
+                .btn-train:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
                 .btn-spam:disabled { background: #94a3b8; cursor: not-allowed; }
                 .btn-endchat {
                     background: rgba(255,255,255,0.18);
@@ -446,6 +466,10 @@ export default function ChatInterface() {
                             <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 700 }}>LLM Chat Console</h2>
                         </div>
                         <div className="chat-header-actions">
+                            <button className="btn-train" onClick={() => setTrainPanelOpen(true)} title="Train AI with custom instructions">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2a4 4 0 0 1 4 4v1a3 3 0 0 1 2.8 2A3 3 0 0 1 21 12a3 3 0 0 1-1.2 2.4A3 3 0 0 1 17 17h-1v1a4 4 0 0 1-8 0v-1H7a3 3 0 0 1-2.8-2.6A3 3 0 0 1 3 12a3 3 0 0 1 2.2-2.9A3 3 0 0 1 8 7V6a4 4 0 0 1 4-4z"/></svg>
+                                Train
+                            </button>
                             <button className="btn-spam" onClick={handleSpamTest} disabled={isThinking} title="Test AI's spam safety guardrails">
                                 Test Spam
                             </button>
@@ -500,6 +524,8 @@ export default function ChatInterface() {
                     </form>
                 </div>
             </div>
+
+            <TrainModelPanel isOpen={trainPanelOpen} onClose={() => setTrainPanelOpen(false)} />
         </>
     );
 }

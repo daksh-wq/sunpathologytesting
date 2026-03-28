@@ -1,6 +1,7 @@
 import { getReportStatusResponse } from '../data/mockReportSystem';
 import { testPrices, getTestPreparation } from '../data/testPrices';
 import { labInfo } from '../data/labKnowledge';
+import { getTrainingPromptBlock } from './trainingDataService';
 
 const API_PROXY_URL = '/api/gemini';
 
@@ -147,6 +148,9 @@ export const generateResponseStream = async function* (userMessage, conversation
             return `- **${b.name} Branch**: ${b.address} (Landmark: ${b.landmark}). Directions: ${b.directions}`;
         }).join('\n');
 
+        // Get custom training data from the training panel (if any)
+        const trainingBlock = getTrainingPromptBlock();
+
         const prompt = `
     ${SYSTEM_PROMPT}
 
@@ -238,6 +242,8 @@ export const generateResponseStream = async function* (userMessage, conversation
 
     📝 FULL CONVERSATION CHRONOLOGY(Context):
     ${historyText || "(अभी call शुरू हुई है)"}
+
+    ${trainingBlock}
 
     🚫 ** STRICT BEHAVIORAL RULES **:
     You have recently said: ${previousAiResponses || "Nothing"}
